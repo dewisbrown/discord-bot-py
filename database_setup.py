@@ -10,7 +10,8 @@ cursor = conn.cursor()
 cursor.execute('''CREATE TABLE IF NOT EXISTS points (
                     user_id INTEGER PRIMARY KEY,
                     points INTEGER DEFAULT 0,
-                    last_awarded_at TIMESTAMP
+                    last_awarded_at TIMESTAMP,
+                    level INTEGER DEFAULT 1
                 )''')
 
 # Commit and close the connection
