@@ -1,17 +1,19 @@
-from discord.ext import commands
 import sqlite3
 import datetime
 import os
+from discord.ext import commands
 
 db_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'points.db')
 
 class BattlepassCog(commands.Cog):
+    '''Commands to register for battlepass, collect points, and increase tier level with points.'''
     def __init__(self, bot):
         self.bot = bot
 
 
     @commands.Cog.listener()
     async def on_ready(self):
+        '''Print statment to ensure loads properly.'''
         print('Battlepass Cog loaded.')
 
 
@@ -19,6 +21,7 @@ class BattlepassCog(commands.Cog):
     async def register(self, ctx):
         '''Enters user into battlepass database.'''
         user_id = ctx.author.id
+        display_name = ctx.author.display_name
         registration_timestamp = datetime.datetime.now()
 
         # Connect to the database
@@ -32,7 +35,7 @@ class BattlepassCog(commands.Cog):
         if result:
             await ctx.send("You are already registered.")
         else:
-            cursor.execute('INSERT INTO points (user_id, points, last_awarded_at, level) VALUES (?, ?, ?, ?)', (user_id, 30, registration_timestamp, 1))
+            cursor.execute('INSERT INTO points (user_id, points, last_awarded_at, level, display_name) VALUES (?, ?, ?, ?, ?)', (user_id, 30, registration_timestamp, 1, display_name))
             conn.commit()
 
             message = f'Timestamp for registration: {registration_timestamp.strftime("%Y-%m-%d %I:%M %p")}\n'
@@ -126,6 +129,26 @@ class BattlepassCog(commands.Cog):
             await ctx.send(f'Level: {level}, Points: {server_points}.')
         else:
             await ctx.send('You\'re not registered in the points system yet. Use the ```$register``` command to get started.')
+
+
+    @commands.command()
+    async def top5(self, ctx):
+        '''Returns the top 5 battlepass members.'''
+        # Connect to the database
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+
+        # Checks top 5 users
+        cursor.execute('SELECT display_name, level, points FROM points ORDER BY level DESC, points DESC LIMIT 5')
+        results = cursor.fetchall()
+        message = ''
+
+        for result in results:
+            display_name, level, points = result
+            message += f'{display_name} - Level: {level} Points: {points}'
+        
+        await ctx.send(message)
+
 
 async def setup(bot):
     await bot.add_cog(BattlepassCog(bot))
