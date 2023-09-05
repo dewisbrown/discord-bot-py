@@ -17,6 +17,7 @@ class BattlepassCog(commands.Cog):
 
     @commands.command()
     async def register(self, ctx):
+        '''Enters user into battlepass database.'''
         user_id = ctx.author.id
         registration_timestamp = datetime.datetime.now()
 
