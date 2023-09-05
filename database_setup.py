@@ -15,6 +15,15 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS points (
                     display_name TEXT
                 )''')
 
+# Create a table to store user inventory
+cursor.execute('''CREATE TABLE IF NOT EXISTS inventory (
+                    user_id INTEGER,
+                    item_name TEXT,
+                    value INTEGER,
+                    purchase_date TIMESTAMP,
+                    FOREIGN KEY (user_id) REFERENCES points (user_id)
+                )''')
+
 # Commit and close the connection
 conn.commit()
 conn.close()
