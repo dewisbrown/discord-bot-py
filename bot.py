@@ -20,6 +20,7 @@ async def on_ready():
 async def load():
     await bot.load_extension('cogs.battlepass')
     await bot.load_extension('cogs.basics')
+    await bot.load_extension('cogs.chat')
 
 
 async def main():
