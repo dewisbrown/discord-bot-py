@@ -49,9 +49,9 @@ class ChatCog(commands.Cog):
                 else:
                     await ctx.send('No response received from ChatGPT.')
             else:
-                await ctx.send(f'Error: {response.status_code} - {response.text}')
+                print(f'Error: {response.status_code} - {response.text}')
         except Exception as e:
-            await ctx.send(f'Error: {str(e)}')
+            print(f'Error: {str(e)}')
 
 
 async def setup(bot):
