@@ -108,7 +108,7 @@ class BattlepassCog(commands.Cog):
             # Print next redemption time
             await ctx.send(f'Your next redemption time is: {next_redemption_time}')
         else:
-            await ctx.send('You\'re not registered in the points system yet. Use the ```$register``` command to get started.')
+            await ctx.send('You\'re not registered in the points system yet. Use the `$register` command to get started.')
 
         conn.close()
 
@@ -250,7 +250,7 @@ class BattlepassCog(commands.Cog):
 
                     await ctx.send(f'You purchased {item} for {item_value} points.')
                 else:
-                    await ctx.send(f'You do not have enough points to purchase this item.')
+                    await ctx.send('You do not have enough points to purchase this item.')
             else:
                 await ctx.send('Register for the battlepass to earn points and purchase items by using the `$register` command.')
         else:
