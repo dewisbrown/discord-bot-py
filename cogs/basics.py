@@ -14,17 +14,6 @@ class BasicsCog(commands.Cog):
 
 
     @commands.command()
-    async def listcommands(self, ctx):
-        message = '$age : Amount of days you have been in the server.\n'
-        message += '$battlepass: Level and points for user.\n'
-        message += '$points: Earn 10 points every hour.\n'
-        message += '$tierup: Buy battlepass level with points.\n'
-        message += '$register: Enter yourself into battlepass.\n'
-        message += '$hello: Bot responds with hello.'
-        
-        await ctx.send(message)
-
-    @commands.command()
     async def hello(self, ctx):
         '''Test command, replies hello!'''
         await ctx.send('Hello, I am your Discord bot!')
