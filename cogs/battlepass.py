@@ -1,22 +1,45 @@
 import sqlite3
 import datetime
 import os
-from discord.ext import commands
+import random
+from discord.ext import commands, tasks
 
 db_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'points.db')
+shop_path = os.path.join(os.path.dirname(__file__), '..', 'shop_items.txt')
 
-shop = {
-    'Spinning Top': 5,
-    'Rusty Penny': 1,
-    'Holographic Eddie Trading Card': 70,
-    'Fuji Apple': 10,
-    'Cool Shades': 20
-}
+shop = {}
+
+def read_shop_file():
+    '''Returns list of items and values from text file.'''
+    with open(shop_path, 'r', encoding='utf-8') as file:
+        items_list = [line.strip() for line in file]
+    return items_list
+
+
+@tasks.loop(hours=1)
+async def refresh_shop():
+    '''Updates shop with 5 new items every two hours.'''
+    global shop
+    items_list = read_shop_file()
+    random.shuffle(items_list)
+
+    new_shop = {}
+
+    while len(new_shop) < 5 and items_list:
+        item_value_pair = items_list.pop(0).split(',')
+        if len(item_value_pair) == 2:
+            item, value = item_value_pair
+            if item not in shop:
+                new_shop[item] = int(value)
+  
+    shop = new_shop
+
 
 class BattlepassCog(commands.Cog):
     '''Commands to register for battlepass, collect points, and increase tier level with points.'''
     def __init__(self, bot):
         self.bot = bot
+        refresh_shop.start()
 
 
     @commands.Cog.listener()
@@ -43,11 +66,11 @@ class BattlepassCog(commands.Cog):
         if result:
             await ctx.send("You are already registered.")
         else:
-            cursor.execute('INSERT INTO points (user_id, points, last_awarded_at, level, display_name) VALUES (?, ?, ?, ?, ?)', (user_id, 30, registration_timestamp, 1, display_name))
+            cursor.execute('INSERT INTO points (user_id, points, last_awarded_at, level, display_name) VALUES (?, ?, ?, ?, ?)', (user_id, 100, registration_timestamp, 1, display_name))
             conn.commit()
 
             message = f'Timestamp for registration: {registration_timestamp.strftime("%Y-%m-%d %I:%M %p")}\n'
-            message += 'You have received 30 points for registering.'
+            message += 'You have received 100 points for registering.'
             await ctx.send(message)
         
         conn.close()
@@ -55,7 +78,7 @@ class BattlepassCog(commands.Cog):
 
     @commands.command()
     async def points(self, ctx):
-        '''Allows user to get 10 points per hour.'''
+        '''Allows user to get 20 points per hour.'''
         user_id = ctx.author.id
 
         # Connect to the database
@@ -75,10 +98,10 @@ class BattlepassCog(commands.Cog):
 
             # Check if it has been at least 24 hours
             if time_since_last_awarded.total_seconds() >= 3600: # 3600 seconds/hour
-                cursor.execute('UPDATE points SET points = points + 10, last_awarded_at = ? WHERE user_id = ?', (current_time, user_id))
+                cursor.execute('UPDATE points SET points = points + 20, last_awarded_at = ? WHERE user_id = ?', (current_time, user_id))
                 conn.commit()
 
-                await ctx.send('You\'ve been awarded 10 points!')
+                await ctx.send('You\'ve been awarded 20 points!')
             else: 
                 await ctx.send('Sorry, you can only claim points once an hour.\n')
             
@@ -113,8 +136,6 @@ class BattlepassCog(commands.Cog):
                 await ctx.send(f'You leveled up to level: {current_level + 1}')
             else:
                 await ctx.send('You need 40 points to level up.')
-            
-            await ctx.send(f'Your points: {points}')
         else:
             await ctx.send('You\'re not registered in the database yet. Use ```$register``` to enter yourself.')
 
@@ -153,7 +174,7 @@ class BattlepassCog(commands.Cog):
 
         for result in results:
             display_name, level, points = result
-            message += f'{display_name} - Level: {level} Points: {points}'
+            message += f'{display_name} - Level: {level} Points: {points}\n'
         
         await ctx.send(message)
 
