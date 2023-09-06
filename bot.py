@@ -14,7 +14,20 @@ bot = commands.Bot(command_prefix='$', intents=intents)
 
 @bot.event
 async def on_ready():
-    print('Success! Bot is connected to Discord.')
+    print(f'Success! Logged in as {bot.user.name}')
+
+
+@bot.event
+async def on_message(message):
+    await bot.process_commands(message)
+    if message.author == bot.user:
+        return
+
+
+@bot.event
+async def on_command_error(ctx, error):
+    if isinstance(error, commands.CommandNotFound):
+        await ctx.send('Command not found. Type `$help` for a list of commands.')
 
 
 async def load():
