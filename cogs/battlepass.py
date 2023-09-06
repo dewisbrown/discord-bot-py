@@ -101,12 +101,17 @@ class BattlepassCog(commands.Cog):
                 cursor.execute('UPDATE points SET points = points + 20, last_awarded_at = ? WHERE user_id = ?', (current_time, user_id))
                 conn.commit()
 
-                await ctx.send('You\'ve been awarded 20 points!')
+                message = 'You\'ve been awarded 20 points!\n'
+                message += f'Your next redemption time is: {(current_time + datetime.timedelta(hours=1)).strftime("%Y-%m-%d %I:%M %p")}'
+                await ctx.send(message)
+
             else: 
-                await ctx.send('Sorry, you can only claim points once an hour.\n')
-            
-            # Print next redemption time
-            await ctx.send(f'Your next redemption time is: {next_redemption_time}')
+                message = 'Sorry, you can only claim points once an hour.\n'
+                message += f'Your next redemption time is: {next_redemption_time}'
+                await ctx.send(message)
+                
+                # Print next redemption time
+                await ctx.send()
         else:
             await ctx.send('You\'re not registered in the points system yet. Use the `$register` command to get started.')
 
