@@ -1,0 +1,30 @@
+Potato Salad,5
+Spaghetti Whistle,10
+Sock with Holes,15
+Broken Toaster,20
+Left-handed Scissors,25
+Rubber Chicken,30
+Invisible Ink Pen,35
+Square Watermelon,40
+Banana Phone,45
+Square Pizza,60
+Air Guitar,65
+One-ply Toilet Paper,90
+Left-handed Hammer,110
+Digital Watch with Roman Numerals,115
+Flamingo Croquet Set,140
+Twisted Pretzel Straw,155
+Anarchy Symbol Cookie Cutter,160
+One-sided Dice,190
+Bluetooth Toaster,195
+Fluffy Rocking Chair,200
+Portable Hole,220
+Bubble Wrap Wallpaper,240
+Glow-in-the-dark Sunglasses,270
+Pre-chewed Gum,315
+Spaghetti in a Can,330
+One-sided Coin,480
+Banana-themed Banana Stand,495
+Invisible Cloak,500
+Deadman's Cock Ring,200
+Ed's Jar of Farts,40
