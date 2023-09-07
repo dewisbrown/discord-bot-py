@@ -2,10 +2,11 @@ import os
 import random
 import sqlite3
 import datetime
+import csv
 from discord.ext import commands, tasks
 
 db_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'points.db')
-shop_path = os.path.join(os.path.dirname(__file__), '..', 'shop_items.txt')
+shop_path = os.path.join(os.path.dirname(__file__), '..', 'shop.csv')
 shop = {}
 
 class ShopCog(commands.Cog):
@@ -26,9 +27,9 @@ class ShopCog(commands.Cog):
         message = ''
         
         for key, value in shop.items():
-            message += f'{key} - {value} points.\n'
+            message += f'{key:<25} - {value:>5}\n'
         
-        await ctx.send(message)
+        await ctx.send(f'```{message}```')
     
 
     @commands.command()
@@ -102,30 +103,29 @@ class ShopCog(commands.Cog):
 
     
     
-@tasks.loop(hours=1)
+@tasks.loop(seconds=5)
 async def refresh_shop():
     '''Updates shop with 5 new items every hour.'''
     global shop
-    items_list = read_shop_file()
-    random.shuffle(items_list)
-
     new_shop = {}
 
-    while len(new_shop) < 5 and items_list:
-        item_value_pair = items_list.pop(0).split(',')
-        if len(item_value_pair) == 2:
-            item, value = item_value_pair
-            if item not in shop:
-                new_shop[item] = int(value)
+    with open('./shop.csv', 'r', encoding='utf-8', newline='') as file:
+        reader = csv.DictReader(file)
+
+        items_list = list(reader)
+        random.shuffle(items_list)
+
+        for item in items_list:
+            item_name = item['item_name']
+            value = item['value']
+
+            if item_name not in shop:
+                new_shop[item_name] = value
+            
+            if len(new_shop) >= 5:
+                break
 
     shop = new_shop
-
-
-def read_shop_file():
-    '''Returns list of items and values from text file.'''
-    with open(shop_path, 'r', encoding='utf-8') as file:
-        items_list = [line.strip() for line in file]
-    return items_list
 
 
 async def setup(bot):
