@@ -6,8 +6,26 @@ from discord.ext import commands, tasks
 
 db_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'points.db')
 shop_path = os.path.join(os.path.dirname(__file__), '..', 'shop_items.txt')
-
 shop = {}
+
+# TODO: Make items have rarity. Shop will have one very rare/expensive item and the rest common/cheap.
+@tasks.loop(hours=1)
+async def refresh_shop():
+    '''Updates shop with 5 new items every hour.'''
+    global shop
+    items_list = read_shop_file()
+    random.shuffle(items_list)
+
+    new_shop = {}
+
+    while len(new_shop) < 5 and items_list:
+        item_value_pair = items_list.pop(0).split(',')
+        if len(item_value_pair) == 2:
+            item, value = item_value_pair
+            if item not in shop:
+                new_shop[item] = int(value)
+
+    shop = new_shop
 
 def read_shop_file():
     '''Returns list of items and values from text file.'''
@@ -42,26 +60,6 @@ def get_points_for_command(level):
         return 45
     if level < 50:
         return 50
-
-
-# TODO: Make items have rarity. Shop will have one very rare/expensive item and the rest common/cheap.
-@tasks.loop(hours=1)
-async def refresh_shop():
-    '''Updates shop with 5 new items every two hours.'''
-    global shop
-    items_list = read_shop_file()
-    random.shuffle(items_list)
-
-    new_shop = {}
-
-    while len(new_shop) < 5 and items_list:
-        item_value_pair = items_list.pop(0).split(',')
-        if len(item_value_pair) == 2:
-            item, value = item_value_pair
-            if item not in shop:
-                new_shop[item] = int(value)
-  
-    shop = new_shop
 
 
 class BattlepassCog(commands.Cog):
