@@ -16,6 +16,35 @@ def read_shop_file():
     return items_list
 
 
+def get_points_to_level(level):
+    '''Helper function to let bot know how many points it cost to tier up.'''
+    if level < 5:
+        return 40
+    if level < 15:
+        return 50
+    if level < 25:
+        return 60
+    if level < 35:
+        return 75
+    if level < 50:
+        return 100
+
+
+def get_points_for_command(level):
+    '''Helper function to determine how many points to give user when running $points.'''
+    if level < 5:
+        return 10
+    if level < 15:
+        return 20
+    if level < 25:
+        return 30
+    if level < 35:
+        return 45
+    if level < 50:
+        return 50
+
+
+# TODO: Make items have rarity. Shop will have one very rare/expensive item and the rest common/cheap.
 @tasks.loop(hours=1)
 async def refresh_shop():
     '''Updates shop with 5 new items every two hours.'''
@@ -78,7 +107,7 @@ class BattlepassCog(commands.Cog):
 
     @commands.command()
     async def points(self, ctx):
-        '''Allows user to get 20 points per hour.'''
+        '''Allows user to get 10 points every 15 minutes.'''
         user_id = ctx.author.id
 
         # Connect to the database
@@ -86,27 +115,28 @@ class BattlepassCog(commands.Cog):
         cursor = conn.cursor()
 
         # Check the last awarded timestamp for the user
-        cursor.execute('SELECT last_awarded_at FROM points WHERE user_id = ?', (user_id,))
+        cursor.execute('SELECT last_awarded_at, level FROM points WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
 
         if result:
-            last_awarded_at_str = result[0]
+            last_awarded_at_str, level = result
             last_awarded_at = datetime.datetime.strptime(last_awarded_at_str, '%Y-%m-%d %H:%M:%S.%f')
             current_time = datetime.datetime.now()
             time_since_last_awarded = current_time - last_awarded_at
-            next_redemption_time = (last_awarded_at + datetime.timedelta(hours=1)).strftime('%Y-%m-%d %I:%M %p')
+            next_redemption_time = (last_awarded_at + datetime.timedelta(minutes=15)).strftime('%Y-%m-%d %I:%M %p')
 
-            # Check if it has been at least 24 hours
-            if time_since_last_awarded.total_seconds() >= 3600: # 3600 seconds/hour
-                cursor.execute('UPDATE points SET points = points + 20, last_awarded_at = ? WHERE user_id = ?', (current_time, user_id))
+            # Check if it has been at least 15 minutes
+            if time_since_last_awarded.total_seconds() >= 900: # 15 minutes
+                points_to_increment = get_points_for_command(level)
+                cursor.execute('UPDATE points SET points = points + ?, last_awarded_at = ? WHERE user_id = ?', (points_to_increment, current_time, user_id))
                 conn.commit()
 
-                message = 'You\'ve been awarded 20 points!\n'
-                message += f'Your next redemption time is: {(current_time + datetime.timedelta(hours=1)).strftime("%Y-%m-%d %I:%M %p")}'
+                message = f'You\'ve been awarded {points_to_increment} points!\n'
+                message += f'Your next redemption time is: {(current_time + datetime.timedelta(minutes=15)).strftime("%Y-%m-%d %I:%M %p")}'
                 await ctx.send(message)
 
             else: 
-                message = 'Sorry, you can only claim points once an hour.\n'
+                message = 'Sorry, you can only claim points every 15 minutes.\n'
                 message += f'Your next redemption time is: {next_redemption_time}'
                 await ctx.send(message)
                 
@@ -133,16 +163,17 @@ class BattlepassCog(commands.Cog):
 
         if result:
             current_level, points = result
+            points_to_level_up = get_points_to_level(current_level)
 
-            if points >= 40:
-                cursor.execute('UPDATE points SET points = points - 40, level = level + 1 WHERE user_id = ?', (user_id,))
+            if points >= points_to_level_up:
+                cursor.execute('UPDATE points SET points = points - ?, level = level + 1 WHERE user_id = ?', (points_to_level_up, user_id,))
                 conn.commit()
 
                 await ctx.send(f'You leveled up to level: {current_level + 1}')
             else:
-                await ctx.send('You need 40 points to level up.')
+                await ctx.send(f'You need {points_to_level_up} points to level up.')
         else:
-            await ctx.send('You\'re not registered in the database yet. Use ```$register``` to enter yourself.')
+            await ctx.send('You\'re not registered in the database yet. Use `$register` to enter yourself.')
 
 
     @commands.command()
@@ -162,7 +193,7 @@ class BattlepassCog(commands.Cog):
             server_points, level = result
             await ctx.send(f'Level: {level}, Points: {server_points}.')
         else:
-            await ctx.send('You\'re not registered in the points system yet. Use the ```$register``` command to get started.')
+            await ctx.send('You\'re not registered in the points system yet. Use the `$register` command to get started.')
 
 
     @commands.command()
@@ -188,8 +219,14 @@ class BattlepassCog(commands.Cog):
     async def shop(self, ctx):
         '''Prints the shop items and values.'''
         message = ''
+        max_length = 0
+
         for key, value in shop.items():
-            message += f'{key} - {value} points.\n'
+            if len(key) > max_length:
+                max_length = len(key)
+        
+        for key, value in shop.items():
+            message += f'{key.ljust(max_length)} {value} points.\n'
         await ctx.send(message)
 
 
