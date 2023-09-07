@@ -34,6 +34,7 @@ async def load():
     await bot.load_extension('cogs.battlepass')
     await bot.load_extension('cogs.basics')
     await bot.load_extension('cogs.chat')
+    await bot.load_extension('cogs.shop')
 
 
 async def main():
