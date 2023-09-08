@@ -50,7 +50,7 @@ class BattlepassCog(commands.Cog):
     async def register(self, ctx):
         '''Enters user into battlepass database.'''
         user_id = ctx.author.id
-        display_name = ctx.author.display_name
+        user_name = ctx.author.name
         registration_timestamp = datetime.datetime.now()
 
         # Connect to the database
@@ -64,7 +64,7 @@ class BattlepassCog(commands.Cog):
         if result:
             await ctx.send("You are already registered.")
         else:
-            cursor.execute('INSERT INTO points (user_id, points, last_awarded_at, level, display_name) VALUES (?, ?, ?, ?, ?)', (user_id, 100, registration_timestamp, 1, display_name))
+            cursor.execute('INSERT INTO points (user_id, points, last_awarded_at, level, user_name) VALUES (?, ?, ?, ?, ?)', (user_id, 100, registration_timestamp, 1, user_name))
             conn.commit()
 
             embed = discord.Embed(title='Battlepass Registration', timestamp=registration_timestamp)
@@ -168,7 +168,8 @@ class BattlepassCog(commands.Cog):
         if result:
             server_points, level = result
             embed = discord.Embed(title='Battlepass Progress', timestamp=datetime.datetime.now())
-            embed.set_author(name=f'Requested by {ctx.author.name}', icon_url=ctx.author.avatar)
+            embed.set_author(name=ctx.author.name)
+            embed.set_thumbnail(url=ctx.author.avatar)
             embed.add_field(name=f'Level: {level}', value=f'Points: {server_points}', inline=False)
             await ctx.send(embed=embed)
         else:
@@ -185,15 +186,15 @@ class BattlepassCog(commands.Cog):
         cursor = conn.cursor()
 
         # Checks top 5 users
-        cursor.execute('SELECT display_name, level, points FROM points ORDER BY level DESC, points DESC LIMIT 5')
+        cursor.execute('SELECT user_name, level, points FROM points ORDER BY level DESC, points DESC LIMIT 5')
         results = cursor.fetchall()
 
         embed = discord.Embed(title='Top 5 Battlepass Members', description='Sorted by level and points.', timestamp=datetime.datetime.now())
         embed.set_author(name=f'Requested by {ctx.author.name}', icon_url=ctx.author.avatar)
 
         for result in results:
-            display_name, level, points = result
-            embed.add_field(name=display_name, value=f'Level: {level} Points: {points}', inline=False)
+            user_name, level, points = result
+            embed.add_field(name=user_name, value=f'Level: {level} Points: {points}', inline=False)
         
         await ctx.send(embed=embed)
         conn.close()
