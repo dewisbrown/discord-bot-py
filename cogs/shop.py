@@ -3,11 +3,14 @@ import random
 import sqlite3
 import datetime
 import csv
+import discord
+import pytz
 from discord.ext import commands, tasks
 
 db_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'points.db')
 shop_path = os.path.join(os.path.dirname(__file__), '..', 'shop.csv')
 shop = {}
+refresh_time = datetime.datetime.now()
 
 class ShopCog(commands.Cog):
     def __init__(self, bot):
@@ -24,12 +27,13 @@ class ShopCog(commands.Cog):
     @commands.command()
     async def shop(self, ctx):
         '''Prints the shop items and values.'''
-        message = ''
+        embed = discord.Embed(title='Item Shop', description=f'Refreshes at {refresh_time.strftime("%H:%M %Z")}', timestamp=datetime.datetime.now())
+        embed.set_author(name=f'Requested by {ctx.author.name}', icon_url=ctx.author.avatar)
         
         for key, value in shop.items():
-            message += f'{key:<25} - {value:>5}\n'
+            embed.add_field(name=key, value=f'Points: {value}', inline=False)
         
-        await ctx.send(f'```{message}```')
+        await ctx.send(embed=embed)
     
 
     @commands.command()
@@ -103,11 +107,14 @@ class ShopCog(commands.Cog):
 
     
     
-@tasks.loop(seconds=5)
+@tasks.loop(seconds=30)
 async def refresh_shop():
     '''Updates shop with 5 new items every hour.'''
     global shop
     new_shop = {}
+
+    current_time = datetime.datetime.now(pytz.timezone('US/Central'))
+    set_shop_refresh_time(current_time + datetime.timedelta(seconds=30))
 
     with open('./shop.csv', 'r', encoding='utf-8', newline='') as file:
         reader = csv.DictReader(file)
@@ -126,6 +133,11 @@ async def refresh_shop():
                 break
 
     shop = new_shop
+
+
+def set_shop_refresh_time(timestamp):
+    global refresh_time
+    refresh_time = timestamp
 
 
 async def setup(bot):
