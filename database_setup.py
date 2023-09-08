@@ -12,7 +12,7 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS points (
                     points INTEGER DEFAULT 0,
                     last_awarded_at TIMESTAMP,
                     level INTEGER DEFAULT 1,
-                    display_name TEXT
+                    user_name TEXT
                 )''')
 
 # Create a table to store user inventory
@@ -20,6 +20,7 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS inventory (
                     user_id INTEGER,
                     item_name TEXT,
                     value INTEGER,
+                    rarity TEXT,
                     purchase_date TIMESTAMP,
                     FOREIGN KEY (user_id) REFERENCES points (user_id)
                 )''')
