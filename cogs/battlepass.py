@@ -68,7 +68,8 @@ class BattlepassCog(commands.Cog):
             conn.commit()
 
             embed = discord.Embed(title='Battlepass Registration', timestamp=registration_timestamp)
-            embed.set_author(name=f'Requested by {ctx.author.name}', icon_url=ctx.author.avatar)
+            embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar)
+            embed.set_thumbnail(url='http://media.comicbook.com/2018/05/battle-pass-icon-1111187.jpeg')
             embed.add_field(name='', value='You have received 100 points for registering.', inline=False)
             await ctx.send(embed=embed)
         
@@ -103,12 +104,14 @@ class BattlepassCog(commands.Cog):
 
                 embed = discord.Embed(title='Battlepass Points', timestamp=current_time)
                 embed.set_author(name=f'Requested by {ctx.author.name}', icon_url=ctx.author.avatar)
+                embed.set_thumbnail(url='https://cdn4.iconfinder.com/data/icons/stack-of-coins/100/coin-03-512.png')
                 embed.add_field(name=f'You\'ve been awarded {points_to_increment} points!', value=f'Your next redemption time is: {(current_time + datetime.timedelta(minutes=15)).strftime("%Y-%m-%d %I:%M %p")}', inline=False)
                 await ctx.send(embed=embed)
 
             else: 
                 embed = discord.Embed(title='Battlepass Points', timestamp=current_time)
                 embed.set_author(name=f'Requested by {ctx.author.name}', icon_url=ctx.author.avatar)
+                embed.set_thumbnail(url='https://cdn4.iconfinder.com/data/icons/stack-of-coins/100/coin-03-512.png')
                 embed.add_field(name='', value='Sorry, you can only claim points every 15 minutes.', inline=False)
                 embed.add_field(name='', value=f'Your next redemption time is: {next_redemption_time}', inline=False)
                 await ctx.send(embed=embed)
@@ -190,8 +193,8 @@ class BattlepassCog(commands.Cog):
         results = cursor.fetchall()
 
         embed = discord.Embed(title='Top 5 Battlepass Members', description='Sorted by level and points.', timestamp=datetime.datetime.now())
-        embed.set_author(name=f'Requested by {ctx.author.name}', icon_url=ctx.author.avatar)
-
+        embed.set_thumbnail(url='https://ih1.redbubble.net/image.660900869.4748/pp,504x498-pad,600x600,f8f8f8.u8.jpg')
+        
         for result in results:
             user_name, level, points = result
             embed.add_field(name=user_name, value=f'Level: {level} Points: {points}', inline=False)

@@ -30,7 +30,8 @@ class ShopCog(commands.Cog):
         '''Prints the shop items and values.'''
         embed = discord.Embed(title='Item Shop', description=f'Refreshes at {refresh_time.strftime("%H:%M %Z")}', timestamp=datetime.datetime.now())
         embed.set_author(name=f'Requested by {ctx.author.name}', icon_url=ctx.author.avatar)
-        
+        embed.set_thumbnail(url='https://wallpapercave.com/wp/wp7879327.jpg')
+
         for item_name, item_data in shop.items():
             item_value = int(item_data['value'])
             item_rarity = item_data['rarity']
@@ -55,8 +56,9 @@ class ShopCog(commands.Cog):
         items = cursor.fetchall()
 
         if items:
-            embed = discord.Embed(title=f'{ctx.author.name} Inventory', timestamp=datetime.datetime.now())
-            embed.set_thumbnail(url=ctx.author.avatar)
+            embed = discord.Embed(title='Inventory', timestamp=datetime.datetime.now())
+            embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar)
+            embed.set_thumbnail(url='https://www.kindpng.com/picc/m/172-1721685_image-png-international-file-dora-the-explorer-backpack.png')
             for item in items:
                 embed.add_field(name=item[0], value=f'Value: {item[1]} - Rarity: {item[2]}', inline=False)
             await ctx.send(embed=embed)
