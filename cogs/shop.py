@@ -13,6 +13,7 @@ shop = {}
 refresh_time = datetime.datetime.now()
 
 class ShopCog(commands.Cog):
+    '''Commands for viewing item shop, buying, and viewing own inventory.'''
     def __init__(self, bot):
         self.bot = bot
         refresh_shop.start()
@@ -30,8 +31,10 @@ class ShopCog(commands.Cog):
         embed = discord.Embed(title='Item Shop', description=f'Refreshes at {refresh_time.strftime("%H:%M %Z")}', timestamp=datetime.datetime.now())
         embed.set_author(name=f'Requested by {ctx.author.name}', icon_url=ctx.author.avatar)
         
-        for key, value in shop.items():
-            embed.add_field(name=key, value=f'Points: {value}', inline=False)
+        for item_name, item_data in shop.items():
+            item_value = int(item_data['value'])
+            item_rarity = item_data['rarity']
+            embed.add_field(name=item_name, value=f'Points: {item_value} - Rarity: {item_rarity}', inline=False)
         
         await ctx.send(embed=embed)
     
@@ -46,7 +49,7 @@ class ShopCog(commands.Cog):
         cursor = conn.cursor()
 
         # Return user inventory list
-        cursor.execute('''SELECT item_name, value
+        cursor.execute('''SELECT item_name, value, rarity
                             FROM inventory
                             WHERE user_id = ?''', (user_id,))
         items = cursor.fetchall()
@@ -55,7 +58,7 @@ class ShopCog(commands.Cog):
             embed = discord.Embed(title=f'{ctx.author.name} Inventory', timestamp=datetime.datetime.now())
             embed.set_thumbnail(url=ctx.author.avatar)
             for item in items:
-                embed.add_field(name=item[0], value=f'Value: {item[1]}', inline=False)
+                embed.add_field(name=item[0], value=f'Value: {item[1]} - Rarity: {item[2]}', inline=False)
             await ctx.send(embed=embed)
         else:
             await ctx.send('Your inventory is empty.')
@@ -83,7 +86,8 @@ class ShopCog(commands.Cog):
 
         # Check if item is in shop
         if item in shop:
-            item_value = int(shop[item])
+            item_value = int(shop[item]['value'])
+            item_rarity = shop[item]['rarity']
 
             # Check if user has enough points to purchase
             cursor.execute('''SELECT points FROM points WHERE user_id = ?''', (user_id,))
@@ -101,7 +105,7 @@ class ShopCog(commands.Cog):
                     
                     # Insert item into user inventory
                     purchase_date = datetime.datetime.now()
-                    cursor.execute('''INSERT INTO inventory (user_id, item_name, value, purchase_date) VALUES (?, ?, ?, ?)''', (user_id, item, item_value, purchase_date,))
+                    cursor.execute('''INSERT INTO inventory (user_id, item_name, value, rarity, purchase_date) VALUES (?, ?, ?, ?, ?)''', (user_id, item, item_value, item_rarity, purchase_date,))
 
                     conn.commit()
                     conn.close()
@@ -139,9 +143,10 @@ async def refresh_shop():
         for item in items_list:
             item_name = item['item_name']
             value = item['value']
+            rarity = item['rarity']
 
             if item_name not in shop:
-                new_shop[item_name] = value
+                new_shop[item_name] = {'value': value, 'rarity': rarity}
             
             if len(new_shop) >= 5:
                 break
