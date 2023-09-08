@@ -35,6 +35,7 @@ async def load():
     await bot.load_extension('cogs.basics')
     await bot.load_extension('cogs.chat')
     await bot.load_extension('cogs.shop')
+    await bot.load_extension('cogs.pics')
 
 
 async def main():
