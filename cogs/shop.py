@@ -52,10 +52,15 @@ class ShopCog(commands.Cog):
         items = cursor.fetchall()
 
         if items:
-            inventory_list = '\n'.join([f"{item[0]} - Value: {item[1]}" for item in items])
-            await ctx.send(inventory_list)
+            embed = discord.Embed(title=f'{ctx.author.name} Inventory', timestamp=datetime.datetime.now())
+            embed.set_thumbnail(url=ctx.author.avatar)
+            for item in items:
+                embed.add_field(name=item[0], value=f'Value: {item[1]}', inline=False)
+            await ctx.send(embed=embed)
         else:
             await ctx.send('Your inventory is empty.')
+        
+        conn.close()
 
 
     @commands.command()
