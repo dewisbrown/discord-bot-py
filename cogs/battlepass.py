@@ -1,6 +1,7 @@
 import sqlite3
 import datetime
 import os
+import discord
 from discord.ext import commands
 
 db_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'points.db')
@@ -159,7 +160,10 @@ class BattlepassCog(commands.Cog):
 
         if result:
             server_points, level = result
-            await ctx.send(f'Level: {level}, Points: {server_points}.')
+            embed = discord.Embed(title='Battlepass Progress', timestamp=datetime.datetime.now())
+            embed.set_author(name=f'Requested by {ctx.author.name}', icon_url=ctx.author.avatar)
+            embed.add_field(name=f'Level: {level}', value=f'Points: {server_points}', inline=False)
+            await ctx.send(embed=embed)
         else:
             await ctx.send('You\'re not registered in the points system yet. Use the `$register` command to get started.')
 
@@ -174,13 +178,15 @@ class BattlepassCog(commands.Cog):
         # Checks top 5 users
         cursor.execute('SELECT display_name, level, points FROM points ORDER BY level DESC, points DESC LIMIT 5')
         results = cursor.fetchall()
-        message = ''
+
+        embed = discord.Embed(title='Top 5 Battlepass Members', description='Sorted by level and points.', timestamp=datetime.datetime.now())
+        embed.set_author(name=f'Requested by {ctx.author.name}', icon_url=ctx.author.avatar)
 
         for result in results:
             display_name, level, points = result
-            message += f'{display_name} - Level: {level} Points: {points}\n'
+            embed.add_field(name=display_name, value=f'Level: {level} Points: {points}', inline=False)
         
-        await ctx.send(message)
+        await ctx.send(embed=embed)
 
 
 async def setup(bot):
