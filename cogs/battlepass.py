@@ -102,11 +102,21 @@ class BattlepassCog(commands.Cog):
                 cursor.execute('UPDATE points SET points = points + ?, last_awarded_at = ? WHERE user_id = ?', (points_to_increment, current_time, user_id))
                 conn.commit()
 
-                embed = discord.Embed(title='Battlepass Points', timestamp=current_time)
-                embed.set_author(name=f'Requested by {ctx.author.name}', icon_url=ctx.author.avatar)
-                embed.set_thumbnail(url='https://cdn4.iconfinder.com/data/icons/stack-of-coins/100/coin-03-512.png')
-                embed.add_field(name=f'You\'ve been awarded {points_to_increment} points!', value=f'Your next redemption time is: {(current_time + datetime.timedelta(minutes=15)).strftime("%Y-%m-%d %I:%M %p")}', inline=False)
-                await ctx.send(embed=embed)
+                cursor.execute('SELECT points FROM points WHERE user_id = ?', (user_id,))
+                points = cursor.fetchone()
+
+                if points:
+                    points = points[0]
+
+                    embed = discord.Embed(title='Battlepass Points', timestamp=current_time)
+                    embed.set_author(name=f'Requested by {ctx.author.name}', icon_url=ctx.author.avatar)
+                    embed.set_thumbnail(url='https://cdn4.iconfinder.com/data/icons/stack-of-coins/100/coin-03-512.png')
+                    embed.add_field(name=f'You\'ve been awarded {points_to_increment} points!', value=f'Updated points: {points}', inline=False)
+                    embed.add_field(name='', value=f'Your next redemption time is: {(current_time + datetime.timedelta(minutes=15)).strftime("%Y-%m-%d %I:%M %p")}', inline=False)
+            
+                    await ctx.send(embed=embed)
+                else:
+                    await ctx.send('Something went wrong...')
 
             else: 
                 embed = discord.Embed(title='Battlepass Points', timestamp=current_time)
@@ -147,7 +157,7 @@ class BattlepassCog(commands.Cog):
                 embed.add_field(name=f'You leveled up to level: {current_level + 1}', value=f'Points after tier up: {points - points_to_level_up}', inline=False)
                 await ctx.send(embed=embed)
             else:
-                embed.add_field(name='', value=f'You need {points_to_level_up} points to level up.', inline=False)
+                embed.add_field(name=f'You need {points_to_level_up} points to level up.', value=f'Your points: {points}', inline=False)
                 await ctx.send(embed=embed)
         else:
             await ctx.send('You\'re not registered in the database yet. Use `$register` to enter yourself.')
