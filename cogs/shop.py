@@ -78,14 +78,18 @@ class ShopCog(commands.Cog):
 
         # Check if item is in shop
         if item in shop:
-            item_value = shop[item]
+            item_value = int(shop[item])
 
             # Check if user has enough points to purchase
             cursor.execute('''SELECT points FROM points WHERE user_id = ?''', (user_id,))
             points = cursor.fetchone()
 
             if points:
-                points = points[0]
+                points = int(points[0])
+
+                embed = discord.Embed(title='Item Purchase', timestamp=datetime.datetime.now())
+                embed.set_author(name=f'Requested by {ctx.author.name}', icon_url=ctx.author.avatar)
+
                 if points >= item_value:
                     # Deduct item value from user points
                     cursor.execute('''UPDATE points SET points = points - ? WHERE user_id = ?''', (item_value, user_id,))
@@ -97,9 +101,14 @@ class ShopCog(commands.Cog):
                     conn.commit()
                     conn.close()
 
-                    await ctx.send(f'You purchased {item} for {item_value} points.')
+                    embed.add_field(name=f'{item} has been added to your inventory', value=f'View your inventory by using `$inventory`.', inline=False)
+                    embed.add_field(name='', value=f'Points after purchase: {points - item_value}', inline=False)
+                    await ctx.send(embed=embed)
                 else:
-                    await ctx.send('You do not have enough points to purchase this item.')
+                    embed.add_field(name=f'You do not have enough points to purchase {item}.', value='', inline=False)
+                    embed.add_field(name='', value=f'Your points: {points}', inline=False)
+                    embed.add_field(name='', value=f'{item}: {item_value} points.', inline=False)
+                    await ctx.send(embed=embed)
             else:
                 await ctx.send('Register for the battlepass to earn points and purchase items by using the `$register` command.')
         else:
@@ -107,14 +116,14 @@ class ShopCog(commands.Cog):
 
     
     
-@tasks.loop(seconds=30)
+@tasks.loop(minutes=30)
 async def refresh_shop():
-    '''Updates shop with 5 new items every hour.'''
+    '''Updates shop with five new items every thirty minutes.'''
     global shop
     new_shop = {}
 
     current_time = datetime.datetime.now(pytz.timezone('US/Central'))
-    set_shop_refresh_time(current_time + datetime.timedelta(seconds=30))
+    set_shop_refresh_time(current_time + datetime.timedelta(minutes=30))
 
     with open('./shop.csv', 'r', encoding='utf-8', newline='') as file:
         reader = csv.DictReader(file)
@@ -136,6 +145,7 @@ async def refresh_shop():
 
 
 def set_shop_refresh_time(timestamp):
+    '''Updates shop refresh time whenever refresh_shop task runs.'''
     global refresh_time
     refresh_time = timestamp
 
