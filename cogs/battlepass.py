@@ -111,7 +111,6 @@ class BattlepassCog(commands.Cog):
             else: 
                 embed = discord.Embed(title='Battlepass Points', timestamp=current_time)
                 embed.set_author(name=f'Requested by {ctx.author.name}', icon_url=ctx.author.avatar)
-                embed.set_thumbnail(url='https://cdn4.iconfinder.com/data/icons/stack-of-coins/100/coin-03-512.png')
                 embed.add_field(name='', value='Sorry, you can only claim points every 15 minutes.', inline=False)
                 embed.add_field(name='', value=f'Your next redemption time is: {next_redemption_time}', inline=False)
                 await ctx.send(embed=embed)
@@ -138,12 +137,13 @@ class BattlepassCog(commands.Cog):
             current_level, points = result
             points_to_level_up = get_points_to_level(current_level)
             embed = discord.Embed(title='Battlepass Tier Up', timestamp=datetime.datetime.now())
-            embed.set_author(name=f'Requested by {ctx.author.name}', icon_url=ctx.author.avatar)
+            embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar)
 
             if points >= points_to_level_up:
                 cursor.execute('UPDATE points SET points = points - ?, level = level + 1 WHERE user_id = ?', (points_to_level_up, user_id,))
                 conn.commit()
 
+                embed.set_thumbnail(url='https://res.cloudinary.com/teepublic/image/private/s--V423wCbg--/t_Resized%20Artwork/c_fit,g_north_west,h_954,w_954/co_000000,e_outline:48/co_000000,e_outline:inner_fill:48/co_ffffff,e_outline:48/co_ffffff,e_outline:inner_fill:48/co_bbbbbb,e_outline:3:1000/c_mpad,g_center,h_1260,w_1260/b_rgb:eeeeee/t_watermark_lock/c_limit,f_auto,h_630,q_90,w_630/v1535464012/production/designs/3077990_0.jpg')
                 embed.add_field(name=f'You leveled up to level: {current_level + 1}', value=f'Points after tier up: {points - points_to_level_up}', inline=False)
                 await ctx.send(embed=embed)
             else:
