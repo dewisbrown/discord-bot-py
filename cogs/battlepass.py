@@ -76,7 +76,7 @@ class BattlepassCog(commands.Cog):
 
     @commands.command()
     async def points(self, ctx):
-        '''Allows user to get 10 points every 15 minutes.'''
+        '''Allows user to get points every 15 minutes.'''
         user_id = ctx.author.id
 
         # Connect to the database
@@ -100,17 +100,17 @@ class BattlepassCog(commands.Cog):
                 cursor.execute('UPDATE points SET points = points + ?, last_awarded_at = ? WHERE user_id = ?', (points_to_increment, current_time, user_id))
                 conn.commit()
 
-                message = f'You\'ve been awarded {points_to_increment} points!\n'
-                message += f'Your next redemption time is: {(current_time + datetime.timedelta(minutes=15)).strftime("%Y-%m-%d %I:%M %p")}'
-                await ctx.send(message)
+                embed = discord.Embed(title='Battlepass Points', timestamp=current_time)
+                embed.set_author(name=f'Requested by {ctx.author.name}', icon_url=ctx.author.avatar)
+                embed.add_field(name=f'You\'ve been awarded {points_to_increment} points!', value=f'Your next redemption time is: {(current_time + datetime.timedelta(minutes=15)).strftime("%Y-%m-%d %I:%M %p")}', inline=False)
+                await ctx.send(embed=embed)
 
             else: 
-                message = 'Sorry, you can only claim points every 15 minutes.\n'
-                message += f'Your next redemption time is: {next_redemption_time}'
-                await ctx.send(message)
-                
-                # Print next redemption time
-                await ctx.send()
+                embed = discord.Embed(title='Battlepass Points', timestamp=current_time)
+                embed.set_author(name=f'Requested by {ctx.author.name}', icon_url=ctx.author.avatar)
+                embed.add_field(name='', value='Sorry, you can only claim points every 15 minutes.', inline=False)
+                embed.add_field(name='', value=f'Your next redemption time is: {next_redemption_time}', inline=False)
+                await ctx.send(embed=embed)
         else:
             await ctx.send('You\'re not registered in the points system yet. Use the `$register` command to get started.')
 
@@ -133,14 +133,18 @@ class BattlepassCog(commands.Cog):
         if result:
             current_level, points = result
             points_to_level_up = get_points_to_level(current_level)
+            embed = discord.Embed(title='Battlepass Tier Up', timestamp=datetime.datetime.now())
+            embed.set_author(name=f'Requested by {ctx.author.name}', icon_url=ctx.author.avatar)
 
             if points >= points_to_level_up:
                 cursor.execute('UPDATE points SET points = points - ?, level = level + 1 WHERE user_id = ?', (points_to_level_up, user_id,))
                 conn.commit()
 
-                await ctx.send(f'You leveled up to level: {current_level + 1}')
+                embed.add_field(name=f'You leveled up to level: {current_level + 1}', value=f'Points after tier up: {points - points_to_level_up}', inline=False)
+                await ctx.send(embed=embed)
             else:
-                await ctx.send(f'You need {points_to_level_up} points to level up.')
+                embed.add_field(name='', value=f'You need {points_to_level_up} points to level up.', inline=False)
+                await ctx.send(embed=embed)
         else:
             await ctx.send('You\'re not registered in the database yet. Use `$register` to enter yourself.')
 
