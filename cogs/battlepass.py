@@ -67,9 +67,10 @@ class BattlepassCog(commands.Cog):
             cursor.execute('INSERT INTO points (user_id, points, last_awarded_at, level, display_name) VALUES (?, ?, ?, ?, ?)', (user_id, 100, registration_timestamp, 1, display_name))
             conn.commit()
 
-            message = f'Timestamp for registration: {registration_timestamp.strftime("%Y-%m-%d %I:%M %p")}\n'
-            message += 'You have received 100 points for registering.'
-            await ctx.send(message)
+            embed = discord.Embed(title='Battlepass Registration', timestamp=registration_timestamp)
+            embed.set_author(name=f'Requested by {ctx.author.name}', icon_url=ctx.author.avatar)
+            embed.add_field(name='', value='You have received 100 points for registering.', inline=False)
+            await ctx.send(embed=embed)
         
         conn.close()
 
@@ -147,6 +148,8 @@ class BattlepassCog(commands.Cog):
                 await ctx.send(embed=embed)
         else:
             await ctx.send('You\'re not registered in the database yet. Use `$register` to enter yourself.')
+        
+        conn.close()
 
 
     @commands.command()
@@ -170,6 +173,8 @@ class BattlepassCog(commands.Cog):
             await ctx.send(embed=embed)
         else:
             await ctx.send('You\'re not registered in the points system yet. Use the `$register` command to get started.')
+        
+        conn.close()
 
 
     @commands.command()
@@ -191,6 +196,7 @@ class BattlepassCog(commands.Cog):
             embed.add_field(name=display_name, value=f'Level: {level} Points: {points}', inline=False)
         
         await ctx.send(embed=embed)
+        conn.close()
 
 
 async def setup(bot):
