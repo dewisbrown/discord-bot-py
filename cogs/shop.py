@@ -106,7 +106,7 @@ class ShopCog(commands.Cog):
                     conn.commit()
                     conn.close()
 
-                    embed.add_field(name=f'{item} has been added to your inventory', value=f'View your inventory by using `$inventory`.', inline=False)
+                    embed.add_field(name=f'{item} has been added to your inventory', value='View your inventory by using `$inventory`.', inline=False)
                     embed.add_field(name='', value=f'Points after purchase: {points - item_value}', inline=False)
                     await ctx.send(embed=embed)
                 else:
