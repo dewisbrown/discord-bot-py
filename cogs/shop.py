@@ -2,7 +2,7 @@ import os
 import random
 import sqlite3
 import datetime
-import csv
+import json
 import discord
 import pytz
 from discord.ext import commands, tasks
@@ -11,6 +11,10 @@ db_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'points.db')
 shop_path = os.path.join(os.path.dirname(__file__), '..', 'shop.csv')
 shop = {}
 refresh_time = datetime.datetime.now()
+
+# Load categorized items from JSON file for item shop functions/commands
+with open('./categorized_items.json', 'r', encoding='utf-8') as json_file:
+        categorized_items = json.load(json_file)
 
 class ShopCog(commands.Cog):
     '''Commands for viewing item shop, buying, and viewing own inventory.'''
@@ -126,7 +130,6 @@ class ShopCog(commands.Cog):
             await ctx.send(f'{item} is not in the shop. Use `$shop` to see items in the shop.')
 
     
-    
 @tasks.loop(minutes=30)
 async def refresh_shop():
     '''Updates shop with five new items every thirty minutes.'''
@@ -136,22 +139,31 @@ async def refresh_shop():
     current_time = datetime.datetime.now(pytz.timezone('US/Central'))
     set_shop_refresh_time(current_time + datetime.timedelta(minutes=30))
 
-    with open('./shop.csv', 'r', encoding='utf-8', newline='') as file:
-        reader = csv.DictReader(file)
+    rarity_counts = {
+        'Legendary': 1,
+        'Exotic': 1,
+        'Very Rare': 1,
+        'Rare': 2,
+        'Uncommon': 2,
+        'Common': 3
+    }
 
-        items_list = list(reader)
-        random.shuffle(items_list)
+    # Keeps track of item names that have already been added to shop
+    added_items = []
 
-        for item in items_list:
-            item_name = item['item_name']
-            value = item['value']
-            rarity = item['rarity']
+    # Select items from each category to reach the desired counts
+    for rarity, count in rarity_counts.items():
+        available_items = [item for item in categorized_items[rarity] if item['item_name'] not in added_items]
+        selected_items = random.sample(available_items, count)
 
-            if item_name not in shop:
-                new_shop[item_name] = {'value': value, 'rarity': rarity}
-            
-            if len(new_shop) >= 5:
-                break
+        for item_data in selected_items:
+            item_name = item_data['item_name']
+            value = item_data['value']
+            rarity = item_data['rarity']
+            new_shop[item_name] = {'value': value, 'rarity': rarity}
+
+            # Add item name to set of added items
+            added_items.append(item_name)
 
     shop = new_shop
 
