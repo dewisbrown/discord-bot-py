@@ -38,6 +38,7 @@ async def load():
     await bot.load_extension('cogs.shop')
     await bot.load_extension('cogs.ed')
     await bot.load_extension('cogs.translate')
+    await bot.load_extension('cogs.music')
 
 
 async def main():
