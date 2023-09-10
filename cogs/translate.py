@@ -10,6 +10,7 @@ class TranslateCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
+        '''Print statment to ensure loads properly.'''
         print('Translate Cog loaded.')
 
 
@@ -52,7 +53,11 @@ class TranslateCog(commands.Cog):
         try:
             translation = translator.translate(text, dest=target_lang)
             translated_text = translation.text
+            pronounce = translation.pronunciation
+
             embed.add_field(name='', value=translated_text, inline=False)
+            if pronounce != 'None':
+                embed.add_field(name='', value=f'({pronounce})', inline=False)
             embed.add_field(name='', value=text, inline=False)
             await ctx.send(embed=embed)
         except Exception as e:
