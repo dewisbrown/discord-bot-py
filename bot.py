@@ -31,12 +31,13 @@ async def on_command_error(ctx, error):
 
 
 async def load():
+    '''Loads cogs for bots.'''
     await bot.load_extension('cogs.battlepass')
     await bot.load_extension('cogs.basics')
     await bot.load_extension('cogs.chat')
     await bot.load_extension('cogs.shop')
     await bot.load_extension('cogs.ed')
-    await bot.load_extension('cogs.tranlsate')
+    await bot.load_extension('cogs.translate')
 
 
 async def main():
