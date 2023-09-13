@@ -21,6 +21,7 @@ idna==2.10
 multidict==6.0.4
 openai==0.28.0
 python-dotenv==1.0.0
+pytube==15.0.0
 pytz==2023.3
 requests==2.31.0
 rfc3986==1.5.0
