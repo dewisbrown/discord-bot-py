@@ -36,16 +36,16 @@ class MusicCog(commands.Cog):
     async def play(self, ctx, *, search_terms):
         '''Plays the user submitted search terms in audio chat.'''
         # Check if the user is in a voice channel
-        if ctx.author.voice is None:
-            await ctx.send("You need to be in a voice channel to use this command.")
-            return
+        #if ctx.author.voice is None:
+            #await ctx.send("You need to be in a voice channel to use this command.")
+            #return
 
         # Join the user's voice channel
         channel = ctx.author.voice.channel
 
         print(channel)
 
-        voice_client = await channel.connect()
+        #voice_client = await channel.connect()
 
         # Create a YouTube search URL based on user-supplied search terms
         youtube_url = f"https://www.youtube.com/results?search_query={search_terms}"
@@ -73,7 +73,7 @@ class MusicCog(commands.Cog):
         add_to_queue(song_name, song_duration, ctx.author.name, thumbnail_url)
 
         # Play the audio
-        voice_client.play(discord.FFmpegPCMAudio(url2play))
+        #voice_client.play(discord.FFmpegPCMAudio(url2play))
 
         # Adjust embed title when queue is implemented
         embed = discord.Embed(timestamp=datetime.datetime.now())
@@ -84,9 +84,9 @@ class MusicCog(commands.Cog):
         await ctx.send(embed=embed)
 
         # Wait until the audio is finished playing, then disconnect from the voice channel
-        while voice_client.is_playing():
-            await asyncio.sleep(1)
-        await voice_client.disconnect()
+        #while voice_client.is_playing():
+            #await asyncio.sleep(1)
+        #await voice_client.disconnect()
 
         # Clean up cached audio files
         os.remove(f'audio_cache/{info["title"]}.mp3')
