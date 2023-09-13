@@ -4,6 +4,7 @@ import asyncio
 import os
 import datetime
 from discord.ext import commands
+from discord.voice_client import VoiceClient
 
 # List for song queue
 queue = []
@@ -23,7 +24,8 @@ class MusicCog(commands.Cog):
     # Update title to embed when queue is implemented
     @commands.command()
     async def queue(self, ctx):
-        embed = discord.Embed(title=f'Current Queue | num entries', timestamp=datetime.datetime.now())
+        '''Displays the music queue.'''
+        embed = discord.Embed(title=f'Current Queue | {len(queue)}', timestamp=datetime.datetime.now())
         for index, item in enumerate(queue):
             embed.add_field(name=f'{index + 1} | (`{item["song_duration"]}`) {item["song_name"]} - {item["request_author"]}', value='', inline=False)
         await ctx.send(embed=embed)
@@ -40,6 +42,9 @@ class MusicCog(commands.Cog):
 
         # Join the user's voice channel
         channel = ctx.author.voice.channel
+
+        print(channel)
+
         voice_client = await channel.connect()
 
         # Create a YouTube search URL based on user-supplied search terms
