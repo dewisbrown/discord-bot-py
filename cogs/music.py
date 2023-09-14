@@ -34,7 +34,11 @@ class MusicCog(commands.Cog):
             message += f'`{index + 1}` | (`{item["song_duration"]}`) **{item["song_name"]} -** {item["request_author"]}\n'
         
         embed.add_field(name='', value=message, inline=False)
-        await ctx.send(embed=embed)
+        
+        if len(queue) == 0:
+            await ctx.send('The queue is empty.')
+        else:
+            await ctx.send(embed=embed)
 
 
     @commands.command()
@@ -47,7 +51,8 @@ class MusicCog(commands.Cog):
         try:
             # Download URL and get info
             song_info = download_yt.download(url, ctx.author.name)
-            song_path = os.path.join(os.path.dirname(__file__), '..', 'downloads', f'{song_info["song_name"]}.mp4')
+            song_path = song_info['file_path']
+            
             note_emoji = '\U0001F3B5'
 
             if len(queue) == 0:
@@ -71,32 +76,9 @@ class MusicCog(commands.Cog):
             await voice_client.disconnect()
 
             # Remove download from downloads directory
-            download_yt.delete(song_info['song_name'])
+            download_yt.delete(song_path)
         except Exception as ex:
             print(f'An error occurred: {str(ex)}')
-
-    
-    @commands.command()
-    async def ding(self, ctx):
-        '''Joins voice channel and plays ding noise.'''
-        if ctx.author.voice and ctx.author.voice.channel:
-            channel = ctx.author.voice.channel
-        
-            voice_channel = await channel.connect()
-
-            mp4_path = os.path.join(os.path.dirname(__file__), '..', 'downloads', 'ТРИ ПОЛОСКИ  KOLM TRIIPU  THREE STRIPES.mp4')
-
-            if os.path.exists(mp4_path):
-                voice_channel.play(discord.FFmpegPCMAudio(mp4_path))
-
-                while voice_channel.is_playing():
-                    await asyncio.sleep(1)
-
-                await voice_channel.disconnect()
-            else:
-                await ctx.send('File `Ding Sound Effect - No Copyright.mp4` not found.')
-        else:
-            await ctx.send('You need to be in a voice channel to use this command.')
 
 
 async def setup(bot):
