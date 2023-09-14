@@ -38,8 +38,8 @@ async def load():
     await bot.load_extension('cogs.shop')
     await bot.load_extension('cogs.ed')
     await bot.load_extension('cogs.translate')
-    await bot.load_extension('cogs.music')
     await bot.load_extension('cogs.moderation')
+    #await bot.load_extension('cogs.music')         # add when music commands working properly
 
 
 async def main():
