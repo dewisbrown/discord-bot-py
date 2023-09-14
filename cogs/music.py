@@ -2,6 +2,7 @@ import discord
 import asyncio
 import os
 import datetime
+import download_yt
 from discord.ext import commands
 from discord.voice_client import VoiceClient
 from pytube import YouTube
@@ -37,23 +38,39 @@ class MusicCog(commands.Cog):
 
 
     @commands.command()
-    async def play(self, ctx, *, url):
+    async def play(self, ctx, url):
         '''Plays the user submitted search terms in audio chat.'''
-    
-        # pytube YouTube object with user submitted url
-        yt = YouTube(url)
-        song_name = yt.title
-        song_duration = format_time(yt.length)
-        thumbnail_url = yt.thumbnail_url
-        note_emoji = '\U0001F3B5'
+        if ctx.author.voice is None:
+            await ctx.send('You must be in a voice channel to run this command.')
+            return
 
-        # Add song to queue
-        queue.append({'song_name': song_name, 'song_duration': song_duration, 'request_author': ctx.author.name, 'thumbnail_url': thumbnail_url})
-        if len(queue) == 1:
-            await ctx.send(f'{note_emoji}  Added **{song_name} (`{song_duration}`)** to begin playing.')
-        else:
-            await ctx.send(f'{note_emoji}  **{song_name}** added to the queue (`{song_duration}`) - at position {len(queue)}')
+        try:
+            # Download URL and get info
+            song_info = download_yt.download(url, ctx.author.name)
+            song_path = os.path.join(os.path.dirname(__file__), '..', 'downloads', f'{song_info["song_name"]}.mp4')
+            note_emoji = '\U0001F3B5'
 
+            if len(queue) == 0:
+                await ctx.send(f'{note_emoji}  Added **{song_info["song_name"]} (`{song_info["song_duration"]}`)** to begin playing.')
+            else:
+                await ctx.send(f'{note_emoji}  **{song_info["song_name"]}** added to the queue (`{song_info["song_duration"]}`) - at position {len(queue)}')
+                queue.append(song_info)
+
+            # Join voice channel
+            voice_channel = ctx.author.voice.channel
+            voice_client = await voice_channel.connect()
+
+            # Play the audio stream
+            voice_client.play(discord.FFmpegPCMAudio(song_path))
+
+            # Wait for playback to finish
+            while voice_client.is_playing():
+                await asyncio.sleep(1)
+
+            # Leave the voice channel
+            await voice_client.disconnect()
+        except Exception as ex:
+            print(f'An error occurred: {str(ex)}')
 
     
     @commands.command()
@@ -64,7 +81,7 @@ class MusicCog(commands.Cog):
         
             voice_channel = await channel.connect()
 
-            mp4_path = os.path.join(os.path.dirname(__file__), '..', 'downloads', 'Ding Sound Effect - No Copyright.mp4')
+            mp4_path = os.path.join(os.path.dirname(__file__), '..', 'downloads', 'ТРИ ПОЛОСКИ  KOLM TRIIPU  THREE STRIPES.mp4')
 
             if os.path.exists(mp4_path):
                 voice_channel.play(discord.FFmpegPCMAudio(mp4_path))
@@ -77,13 +94,6 @@ class MusicCog(commands.Cog):
                 await ctx.send('File `Ding Sound Effect - No Copyright.mp4` not found.')
         else:
             await ctx.send('You need to be in a voice channel to use this command.')
-        
-        
-
-def format_time(seconds):
-    '''Formats total seconds to %M:%S format.'''
-    minutes, seconds = divmod(seconds, 60)
-    return f'{minutes}:{seconds:02d}'
 
 
 async def setup(bot):
