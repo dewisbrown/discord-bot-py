@@ -69,6 +69,9 @@ class MusicCog(commands.Cog):
 
             # Leave the voice channel
             await voice_client.disconnect()
+
+            # Remove download from downloads directory
+            download_yt.delete(song_info['song_name'])
         except Exception as ex:
             print(f'An error occurred: {str(ex)}')
 
