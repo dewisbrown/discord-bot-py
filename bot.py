@@ -14,20 +14,18 @@ intents.presences = True
 
 bot = commands.Bot(command_prefix='$', intents=intents)
 
+# Remove default help command
+bot.remove_command('help')
+
 @bot.event
 async def on_ready():
+    '''Prints statment when bot is logged in.'''
     print(f'Success! Logged in as {bot.user.name}')
 
 
 @bot.event
-async def on_message(message):
-    await bot.process_commands(message)
-    if message.author == bot.user:
-        return
-
-
-@bot.event
 async def on_command_error(ctx, error):
+    '''Sends error message to user when command is not found.'''
     if isinstance(error, commands.CommandNotFound):
         await ctx.send('Command not found. Type `$help` for a list of commands.')
 
@@ -44,6 +42,7 @@ async def load():
 
 
 async def main():
+    '''Loads cogs and starts the bot login.'''
     async with bot:
         await load()
         await bot.start(os.getenv('BOT_TOKEN'))
