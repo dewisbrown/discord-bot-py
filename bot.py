@@ -39,6 +39,7 @@ async def load():
     await bot.load_extension('cogs.ed')
     await bot.load_extension('cogs.translate')
     await bot.load_extension('cogs.music')
+    await bot.load_extension('cogs.moderation')
 
 
 async def main():
