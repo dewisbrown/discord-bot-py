@@ -1,11 +1,8 @@
-import discord
-import asyncio
-import os
 import datetime
-import download_yt
+import asyncio
+import discord
 from discord.ext import commands
-from discord.voice_client import VoiceClient
-from pytube import YouTube
+import download_yt
 
 # List for song queue
 queue = []
