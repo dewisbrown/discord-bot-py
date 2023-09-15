@@ -33,7 +33,7 @@ class MusicCog(commands.Cog):
 
             for index, item in enumerate(queue):
                 message += f'`{index + 1}` | (`{item["song_duration"]}`) **{item["song_name"]} -** {item["request_author"]}\n'
-            
+
             embed.add_field(name='', value=message, inline=False)
             await ctx.send(embed=embed)
 
@@ -44,7 +44,7 @@ class MusicCog(commands.Cog):
         if ctx.author.voice is None:
             await ctx.send('You must be in a voice channel to run this command.')
             return
-        
+
         note_emoji = '\U0001F3B5'
         voice_client = self.bot.voice_clients
 
@@ -69,12 +69,19 @@ class MusicCog(commands.Cog):
                 voice_client = await voice_channel.connect()
 
                 while len(queue) > 0:
-                    next_song = queue.pop()
+                    next_song = queue.pop(0)
+                    
+                    global current_song
                     current_song = next_song
 
                     # Play the audio stream
                     voice_client.play(discord.FFmpegPCMAudio(next_song['file_path']))
-                    await ctx.send(f'{note_emoji}  Now playing: **{next_song["song_name"]}** - (`{next_song["song_duration"]}`)')
+
+                    embed = discord.Embed(title=f'Queue length: {len(queue)}', timestamp=datetime.datetime.now())
+                    embed.set_author(name=f'{ctx.guild.name} - Now playing', icon_url=ctx.guild.icon.url)
+                    embed.set_thumbnail(url=next_song['thumbnail_url'])
+                    embed.add_field(name=f'{note_emoji}  {next_song["song_name"]} - [`{next_song["song_duration"]}`]', value=f'*Requested by* {next_song["request_author"]}', inline=False)
+                    await ctx.send(embed=embed)
                     
                     # Wait for playback to finish
                     while voice_client.is_playing():
@@ -91,11 +98,27 @@ class MusicCog(commands.Cog):
 
     @commands.command()
     async def skip(self, ctx):
-        if self.bot.voice_clients:
-            ctx.send(f'Skipping {current_song["song_name"]}')
+        '''Stops current song playing and plays next song in queue.'''
+        if self.bot.voice_clients and current_song:
+            await ctx.send(f'Skipping {current_song["song_name"]}')
+            
+            # Remove download from downloads directory
+            download_yt.delete(current_song['file_path'])
+            
             # add skipping logic here
         else:
-            ctx.send('There is no song currently playing.')
+            await ctx.send('There is no song currently playing.')
+
+    
+    @commands.command()
+    async def stop(self, ctx):
+        '''Disconnects bot from voice channel and clears queue.'''
+        if self.bot.voice_clients:
+            self.bot.voice_clients.disconnect()
+            global queue
+            queue.clear()
+        else:
+            await ctx.send('There is no song currently playing.')
 
 
 async def setup(bot):
