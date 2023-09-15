@@ -6,6 +6,7 @@ import download_yt
 
 # List for song queue
 queue = []
+current_song = None
 
 class MusicCog(commands.Cog):
     '''Commands that handle music playing in audio channel.'''
@@ -23,18 +24,17 @@ class MusicCog(commands.Cog):
     @commands.command()
     async def queue(self, ctx):
         '''Displays the music queue.'''
-        note_emoji = '\U0001F3B5'
-        embed = discord.Embed(title=f'{note_emoji}  **Current Queue | {len(queue)} entries**', timestamp=datetime.datetime.now())
-        message = ''
-
-        for index, item in enumerate(queue):
-            message += f'`{index + 1}` | (`{item["song_duration"]}`) **{item["song_name"]} -** {item["request_author"]}\n'
-        
-        embed.add_field(name='', value=message, inline=False)
-        
         if len(queue) == 0:
             await ctx.send('The queue is empty.')
         else:
+            note_emoji = '\U0001F3B5'
+            embed = discord.Embed(title=f'{note_emoji}  **Current Queue | {len(queue)} entries**', timestamp=datetime.datetime.now())
+            message = ''
+
+            for index, item in enumerate(queue):
+                message += f'`{index + 1}` | (`{item["song_duration"]}`) **{item["song_name"]} -** {item["request_author"]}\n'
+            
+            embed.add_field(name='', value=message, inline=False)
             await ctx.send(embed=embed)
 
 
@@ -44,38 +44,58 @@ class MusicCog(commands.Cog):
         if ctx.author.voice is None:
             await ctx.send('You must be in a voice channel to run this command.')
             return
+        
+        note_emoji = '\U0001F3B5'
+        voice_client = self.bot.voice_clients
 
-        try:
-            # Download URL and get info
-            song_info = download_yt.download(url, ctx.author.name)
-            song_path = song_info['file_path']
-            
-            note_emoji = '\U0001F3B5'
-
-            if len(queue) == 0:
-                await ctx.send(f'{note_emoji}  Added **{song_info["song_name"]} (`{song_info["song_duration"]}`)** to begin playing.')
-            else:
-                await ctx.send(f'{note_emoji}  **{song_info["song_name"]}** added to the queue (`{song_info["song_duration"]}`) - at position {len(queue)}')
+        if voice_client:
+            try:
+                # Download URL and get info, add to queue
+                song_info = download_yt.download(url, ctx.author.name)
                 queue.append(song_info)
 
-            # Join voice channel
-            voice_channel = ctx.author.voice.channel
-            voice_client = await voice_channel.connect()
+                await ctx.send(f'{note_emoji}  **{song_info["song_name"]}** added to the queue (`{song_info["song_duration"]}`) - at position {len(queue)}')
+            except Exception as e:
+                print(f'An error occured when adding a song to the queue: {str(e)}')
+        else:
+            try:
+                # Download URL and get info
+                song_info = download_yt.download(url, ctx.author.name)
+                queue.append(song_info)
+                await ctx.send(f'{note_emoji}  Added **{song_info["song_name"]} (`{song_info["song_duration"]}`)** to begin playing.')
 
-            # Play the audio stream
-            voice_client.play(discord.FFmpegPCMAudio(song_path))
+                # Join voice channel
+                voice_channel = ctx.author.voice.channel
+                voice_client = await voice_channel.connect()
 
-            # Wait for playback to finish
-            while voice_client.is_playing():
-                await asyncio.sleep(1)
+                while len(queue) > 0:
+                    next_song = queue.pop()
+                    current_song = next_song
+
+                    # Play the audio stream
+                    voice_client.play(discord.FFmpegPCMAudio(next_song['file_path']))
+                    await ctx.send(f'{note_emoji}  Now playing: **{next_song["song_name"]}** - (`{next_song["song_duration"]}`)')
+                    
+                    # Wait for playback to finish
+                    while voice_client.is_playing():
+                        await asyncio.sleep(1)
+
+                    # Remove download from downloads directory
+                    download_yt.delete(next_song['file_path'])
+            except Exception as ex:
+                print(f'An error occurred trying to play song: {str(ex)}')
 
             # Leave the voice channel
             await voice_client.disconnect()
+    
 
-            # Remove download from downloads directory
-            download_yt.delete(song_path)
-        except Exception as ex:
-            print(f'An error occurred: {str(ex)}')
+    @commands.command()
+    async def skip(self, ctx):
+        if self.bot.voice_clients:
+            ctx.send(f'Skipping {current_song["song_name"]}')
+            # add skipping logic here
+        else:
+            ctx.send('There is no song currently playing.')
 
 
 async def setup(bot):
