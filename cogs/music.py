@@ -1,4 +1,5 @@
 import datetime
+import random
 import asyncio
 import discord
 from discord.ext import commands
@@ -78,7 +79,7 @@ class MusicCog(commands.Cog):
                     voice_client.play(discord.FFmpegPCMAudio(next_song['file_path']))
 
                     embed = discord.Embed(title=f'Queue length: {len(queue)}', timestamp=datetime.datetime.now())
-                    embed.set_author(name=f'{ctx.guild.name} - Now playing', icon_url=ctx.guild.icon.url)
+                    embed.set_author(name=f'{ctx.guild.name} - Now playing')
                     embed.set_thumbnail(url=next_song['thumbnail_url'])
                     embed.add_field(name=f'{note_emoji}  {next_song["song_name"]} - [`{next_song["song_duration"]}`]', value=f'*Requested by* {next_song["request_author"]}', inline=False)
                     await ctx.send(embed=embed)
@@ -115,10 +116,18 @@ class MusicCog(commands.Cog):
         '''Disconnects bot from voice channel and clears queue.'''
         if self.bot.voice_clients:
             self.bot.voice_clients.disconnect()
-            global queue
             queue.clear()
         else:
             await ctx.send('There is no song currently playing.')
+
+    
+    @commands.command()
+    async def shuffle(self, ctx):
+        '''Shuffles queue.'''
+        if len(queue) > 0:
+            random.shuffle(queue)
+        else:
+            await ctx.send('There is nothing in the queue.')
 
 
 async def setup(bot):
