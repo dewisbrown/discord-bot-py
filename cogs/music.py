@@ -56,8 +56,8 @@ class MusicCog(commands.Cog):
                 queue.append(song_info)
 
                 await ctx.send(f'{note_emoji}  **{song_info["song_name"]}** added to the queue (`{song_info["song_duration"]}`) - at position {len(queue)}')
-            except Exception as e:
-                print(f'An error occured when adding a song to the queue: {str(e)}')
+            except Exception as ex:
+                print(f'An error occured when adding a song to the queue: {str(ex)}')
         else:
             try:
                 # Download URL and get info
@@ -79,7 +79,7 @@ class MusicCog(commands.Cog):
                     voice_client.play(discord.FFmpegPCMAudio(next_song['file_path']))
 
                     embed = discord.Embed(title=f'Queue length: {len(queue)}', timestamp=datetime.datetime.now())
-                    embed.set_author(name=f'{ctx.guild.name} - Now playing')
+                    embed.set_author(name=f'{ctx.guild.name} - Now playing', icon_url=ctx.guild.icon)
                     embed.set_thumbnail(url=next_song['thumbnail_url'])
                     embed.add_field(name=f'{note_emoji}  {next_song["song_name"]} - [`{next_song["song_duration"]}`]', value=f'*Requested by* {next_song["request_author"]}', inline=False)
                     await ctx.send(embed=embed)
@@ -100,13 +100,13 @@ class MusicCog(commands.Cog):
     @commands.command()
     async def skip(self, ctx):
         '''Stops current song playing and plays next song in queue.'''
-        if self.bot.voice_clients and current_song:
-            await ctx.send(f'Skipping {current_song["song_name"]}')
-            
-            # Remove download from downloads directory
-            download_yt.delete(current_song['file_path'])
-            
-            # add skipping logic here
+        note_emoji = '\U0001F3B5'
+        voice_client = self.bot.voice_clients
+        
+        if voice_client and current_song:
+            await ctx.send(f'Skipping **{current_song["song_name"]}** - [`{current_song["song_duration"]}`]')
+
+            # add skip logic here
         else:
             await ctx.send('There is no song currently playing.')
 
@@ -114,13 +114,21 @@ class MusicCog(commands.Cog):
     @commands.command()
     async def stop(self, ctx):
         '''Disconnects bot from voice channel and clears queue.'''
-        if self.bot.voice_clients:
-            self.bot.voice_clients.disconnect()
+        print('Stop command entered.')
+        
+        voice_client = self.bot.voice_clients
+        
+        print(f'Voice client playing: {voice_client.is_playing()}')
+
+        if voice_client:
+            await voice_client.disconnect()
+            for song in queue:
+                download_yt.delete(song["file_path"])
             queue.clear()
         else:
             await ctx.send('There is no song currently playing.')
 
-    
+
     @commands.command()
     async def shuffle(self, ctx):
         '''Shuffles queue.'''
