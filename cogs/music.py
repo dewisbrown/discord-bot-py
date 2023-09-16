@@ -101,27 +101,40 @@ class MusicCog(commands.Cog):
     async def skip(self, ctx):
         '''Stops current song playing and plays next song in queue.'''
         note_emoji = '\U0001F3B5'
-        voice_client = self.bot.voice_clients
+        cowboy_emoji = '\U0001F920'
+        voice_client = ctx.voice_client
+        global current_song
+        skipped_song = current_song
         
-        if voice_client and current_song:
-            await ctx.send(f'Skipping **{current_song["song_name"]}** - [`{current_song["song_duration"]}`]')
+        if voice_client and voice_client.is_playing():
+            voice_client.stop()
+            await ctx.send(f'{cowboy_emoji}  Skipped **{current_song["song_name"]}** - [`{current_song["song_duration"]}`]')
 
-            # add skip logic here
+            if queue:
+                next_song = queue.pop(0)
+                current_song = next_song
+                voice_client.play(discord.FFmpegPCMAudio(next_song['file_path']))
+
+                embed = discord.Embed(title=f'Queue length: {len(queue)}', timestamp=datetime.datetime.now())
+                embed.set_author(name=f'{ctx.guild.name} - Now playing', icon_url=ctx.guild.icon)
+                embed.set_thumbnail(url=next_song['thumbnail_url'])
+                embed.add_field(name=f'{note_emoji}  {next_song["song_name"]} - [`{next_song["song_duration"]}`]', value=f'*Requested by* {next_song["request_author"]}', inline=False)
+                await ctx.send(embed=embed)
+            else:
+                await ctx.send('No more songs in the queue.')
         else:
             await ctx.send('There is no song currently playing.')
+        
+        download_yt.delete(skipped_song['file_path'])
 
     
     @commands.command()
     async def stop(self, ctx):
         '''Disconnects bot from voice channel and clears queue.'''
-        print('Stop command entered.')
-        
-        voice_client = self.bot.voice_clients
-        
-        print(f'Voice client playing: {voice_client.is_playing()}')
+        voice_client = ctx.voice_client
 
-        if voice_client:
-            await voice_client.disconnect()
+        if voice_client and voice_client.is_playing():
+            await voice_client.stop()
             for song in queue:
                 download_yt.delete(song["file_path"])
             queue.clear()
@@ -136,6 +149,13 @@ class MusicCog(commands.Cog):
             random.shuffle(queue)
         else:
             await ctx.send('There is nothing in the queue.')
+    
+
+    @commands.command()
+    async def move(self, ctx, song_index, target_index):
+        '''Modifies queue order by moving a song to a target index in the queue.'''
+        if song_index <= len(queue) - 1:
+            pass
 
 
 async def setup(bot):
