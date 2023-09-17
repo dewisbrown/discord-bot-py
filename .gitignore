@@ -1,5 +1,6 @@
 # Cog files to ignore
 ed.py
+translate.py
 
 # Image folder for bot
 images/
