@@ -1,8 +1,14 @@
 import os
+import logging
 import asyncio
 import discord
 from dotenv import load_dotenv
 from discord.ext import commands
+
+# Logging setup
+logging.basicConfig(format='[Line: %(lineno)d <%(filename)s>] %(levelname)s: %(message)s [%(asctime)s]',
+                    datefmt='%I:%M:%S %p',
+                    level=logging.INFO)
 
 load_dotenv()
 
@@ -20,7 +26,7 @@ bot.remove_command('help')
 @bot.event
 async def on_ready():
     '''Prints statment when bot is logged in.'''
-    print(f'Success! Logged in as {bot.user.name}')
+    logging.info('Success! Logged in as %s', bot.user.name)
 
 
 @bot.event
@@ -28,6 +34,7 @@ async def on_command_error(ctx, error):
     '''Sends error message to user when command is not found.'''
     if isinstance(error, commands.CommandNotFound):
         await ctx.send('Command not found. Type `$help` for a list of commands.')
+        logging.error('User input command that does not exist.')
 
 
 async def load():
