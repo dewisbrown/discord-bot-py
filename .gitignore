@@ -1,3 +1,6 @@
+# Cog files to ignore
+ed.py
+
 # Image folder for bot
 images/
 
