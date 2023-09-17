@@ -69,4 +69,5 @@ def get_inventory(user_id):
     cursor.execute('''SELECT item_name, value, rarity
                         FROM inventory
                         WHERE user_id = ?''', (user_id,))
+    # for item in items -> item_name = item[0], value = item[1], rarity = item[2]
     return cursor.fetchall()
