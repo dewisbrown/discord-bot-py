@@ -50,6 +50,8 @@ class BattlepassCog(commands.Cog):
     @commands.command()
     async def register(self, ctx):
         '''Enters user into battlepass database.'''
+        logging.info('Register command submitted by [%s]', ctx.author.name)
+        
         user_id = ctx.author.id
         user_name = ctx.author.name
         registration_timestamp = datetime.datetime.now()
@@ -81,6 +83,7 @@ class BattlepassCog(commands.Cog):
     @commands.command()
     async def points(self, ctx):
         '''Allows user to get points every 15 minutes.'''
+        logging.info('Points command submitted by [%s]', ctx.author.name)
         user_id = ctx.author.id
 
         # Connect to the database
@@ -140,6 +143,7 @@ class BattlepassCog(commands.Cog):
     @commands.command()
     async def tierup(self, ctx):
         '''Allows the user to spend points to level up.'''
+        logging.info('Tierup command submitted by [%s]', ctx.author.name)
         user_id = ctx.author.id
 
         # Connect to the database
@@ -175,6 +179,7 @@ class BattlepassCog(commands.Cog):
     @commands.command()
     async def battlepass(self, ctx):
         '''Returns the users current level and points.'''
+        logging.info('Battlepass command submitted by [%s]', ctx.author.name)
         user_id = ctx.author.id
 
         # Connect to the database
@@ -201,6 +206,8 @@ class BattlepassCog(commands.Cog):
     @commands.command()
     async def top5(self, ctx):
         '''Returns the top 5 battlepass members.'''
+        logging.info('Top5 command submitted by [%s]', ctx.author.name)
+        
         # Connect to the database
         conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
