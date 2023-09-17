@@ -4,6 +4,9 @@ ed.py
 # Image folder for bot
 images/
 
+# Other files to ignore
+ed_urls.csv
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
