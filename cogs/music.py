@@ -20,7 +20,7 @@ class MusicCog(commands.Cog):
         '''Print statment to ensure loads properly.'''
         print('Music Cog loaded.')
 
-    
+
     # Update title to embed when queue is implemented
     @commands.command()
     async def queue(self, ctx):
@@ -71,7 +71,7 @@ class MusicCog(commands.Cog):
 
                 while len(queue) > 0:
                     next_song = queue.pop(0)
-                    
+
                     global current_song
                     current_song = next_song
 
@@ -91,11 +91,11 @@ class MusicCog(commands.Cog):
                     # Remove download from downloads directory
                     download_yt.delete(next_song['file_path'])
             except Exception as ex:
-                print(f'An error occurred trying to play song: {str(ex)}')
+                 await print(f'An error occurred trying to play song: {str(ex)}')
 
             # Leave the voice channel
             await voice_client.disconnect()
-    
+
 
     @commands.command()
     async def skip(self, ctx):
@@ -105,10 +105,11 @@ class MusicCog(commands.Cog):
         voice_client = ctx.voice_client
         global current_song
         skipped_song = current_song
-        
+
         if voice_client and voice_client.is_playing():
             voice_client.stop()
-            await ctx.send(f'{cowboy_emoji}  Skipped **{current_song["song_name"]}** - [`{current_song["song_duration"]}`]')
+            await ctx.send(f'{cowboy_emoji}  Skipped **{current_song["song_name"]}** ' /
+                           f'- [`{current_song["song_duration"]}`]')
 
             if queue:
                 next_song = queue.pop(0)
@@ -124,10 +125,10 @@ class MusicCog(commands.Cog):
                 await ctx.send('No more songs in the queue.')
         else:
             await ctx.send('There is no song currently playing.')
-        
+
         download_yt.delete(skipped_song['file_path'])
 
-    
+
     @commands.command()
     async def stop(self, ctx):
         '''Disconnects bot from voice channel and clears queue.'''
@@ -135,6 +136,11 @@ class MusicCog(commands.Cog):
 
         if voice_client and voice_client.is_playing():
             await voice_client.stop()
+
+            # delete current song
+            download_yt.delete(current_song['file_path'])
+
+            # delete songs in queue
             for song in queue:
                 download_yt.delete(song["file_path"])
             queue.clear()
@@ -149,13 +155,19 @@ class MusicCog(commands.Cog):
             random.shuffle(queue)
         else:
             await ctx.send('There is nothing in the queue.')
-    
+
 
     @commands.command()
-    async def move(self, ctx, song_index, target_index):
+    async def move(self, ctx, index1, index2):
         '''Modifies queue order by moving a song to a target index in the queue.'''
-        if song_index <= len(queue) - 1:
-            pass
+        index1 -= 1
+        index2 -= 1
+
+        if 0 <= index1 < len(queue) and 0 <= index2 < len(queue):
+            queue[index1], queue[index2] = queue[index2], queue[index1]
+            await ctx.send(f'Moved {queue[index1]["song_name"]} to position {index2} in queue.')
+        else:
+            await ctx.send('Invalid index input.')
 
 
 async def setup(bot):
