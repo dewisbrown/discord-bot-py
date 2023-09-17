@@ -38,13 +38,18 @@ class MusicCog(commands.Cog):
 
             embed.add_field(name='', value=message, inline=False)
             await ctx.send(embed=embed)
+        
+        logging.info('Queue command submitted by [%s]', ctx.author.name)
 
 
     @commands.command()
     async def play(self, ctx, url):
         '''Plays the user submitted search terms in audio chat.'''
+        logging.info('Play command submitted by [%s]', ctx.author.name)
+        
         if ctx.author.voice is None:
             await ctx.send('You must be in a voice channel to run this command.')
+            logging.info('Play command failed: [%s] is not in voice channel.', ctx.author.name)
             return
 
         note_emoji = '\U0001F3B5'
@@ -58,7 +63,7 @@ class MusicCog(commands.Cog):
 
                 await ctx.send(f'{note_emoji}  **{song_info["song_name"]}** added to the queue (`{song_info["song_duration"]}`) - at position {len(queue)}')
             except Exception as ex:
-                print(f'An error occured when adding a song to the queue: {str(ex)}')
+                logging.error('Failed to add song to queue: %s', str(ex))
         else:
             try:
                 # Download URL and get info
@@ -92,7 +97,7 @@ class MusicCog(commands.Cog):
                     # Remove download from downloads directory
                     download_yt.delete(next_song['file_path'])
             except Exception as ex:
-                 await print(f'An error occurred trying to play song: {str(ex)}')
+                 logging.error('Failed to play song: %s', str(ex))
 
             # Leave the voice channel
             await voice_client.disconnect()
@@ -101,6 +106,8 @@ class MusicCog(commands.Cog):
     @commands.command()
     async def skip(self, ctx):
         '''Stops current song playing and plays next song in queue.'''
+        logging.info('Skip command submitted by %s', ctx.author.name)
+        
         note_emoji = '\U0001F3B5'
         cowboy_emoji = '\U0001F920'
         voice_client = ctx.voice_client
@@ -133,6 +140,8 @@ class MusicCog(commands.Cog):
     @commands.command()
     async def stop(self, ctx):
         '''Disconnects bot from voice channel and clears queue.'''
+        logging.info('Stop command submitted by [%s]', ctx.author.name)
+        
         voice_client = ctx.voice_client
 
         if voice_client and voice_client.is_playing():
@@ -152,6 +161,8 @@ class MusicCog(commands.Cog):
     @commands.command()
     async def shuffle(self, ctx):
         '''Shuffles queue.'''
+        logging.info('Shuffle command submitted by [%s]', ctx.author.name)
+
         if len(queue) > 0:
             random.shuffle(queue)
         else:
@@ -161,6 +172,8 @@ class MusicCog(commands.Cog):
     @commands.command()
     async def move(self, ctx, index1, index2):
         '''Modifies queue order by moving a song to a target index in the queue.'''
+        logging.info('Move command submitted by [%s]', ctx.author.name)
+        
         index1 -= 1
         index2 -= 1
 
