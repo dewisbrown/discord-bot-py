@@ -1,3 +1,4 @@
+import logging
 import sqlite3
 import datetime
 import os
@@ -43,7 +44,7 @@ class BattlepassCog(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         '''Print statment to ensure loads properly.'''
-        print('Battlepass Cog loaded.')
+        logging.info('Battlepass Cog loaded.')
 
 
     @commands.command()
@@ -72,7 +73,8 @@ class BattlepassCog(commands.Cog):
             embed.set_thumbnail(url='http://media.comicbook.com/2018/05/battle-pass-icon-1111187.jpeg')
             embed.add_field(name='', value='You have received 100 points for registering.', inline=False)
             await ctx.send(embed=embed)
-        
+
+            logging.info('[%s] successfully registered for battlepass.', user_name)
         conn.close()
 
 
@@ -113,10 +115,12 @@ class BattlepassCog(commands.Cog):
                     embed.set_thumbnail(url='https://cdn4.iconfinder.com/data/icons/stack-of-coins/100/coin-03-512.png')
                     embed.add_field(name=f'You\'ve been awarded {points_to_increment} points!', value=f'Updated points: {points}', inline=False)
                     embed.add_field(name='', value=f'Your next redemption time is: {(current_time + datetime.timedelta(minutes=15)).strftime("%Y-%m-%d %I:%M %p")}', inline=False)
-            
                     await ctx.send(embed=embed)
+
+                    logging.info('Successfully awarded %d points to [%s].', points_to_increment, ctx.author.name)
                 else:
                     await ctx.send('Something went wrong...')
+                    logging.error('Failed to select points from db for [%s]', ctx.author.name)
 
             else: 
                 embed = discord.Embed(title='Battlepass Points', timestamp=current_time)
@@ -124,8 +128,11 @@ class BattlepassCog(commands.Cog):
                 embed.add_field(name='', value='Sorry, you can only claim points every 15 minutes.', inline=False)
                 embed.add_field(name='', value=f'Your next redemption time is: {next_redemption_time}', inline=False)
                 await ctx.send(embed=embed)
+
+                logging.info('[%s] attempted to earn points before correct time.', ctx.author.name)
         else:
             await ctx.send('You\'re not registered in the points system yet. Use the `$register` command to get started.')
+            logging.info('[%s] attempted to earn points without being registered to battlepass.', ctx.author.name)
 
         conn.close()
 

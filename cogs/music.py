@@ -1,4 +1,5 @@
 import datetime
+import logging
 import random
 import asyncio
 import discord
@@ -18,7 +19,7 @@ class MusicCog(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         '''Print statment to ensure loads properly.'''
-        print('Music Cog loaded.')
+        logging.info('Music Cog loaded.')
 
 
     # Update title to embed when queue is implemented

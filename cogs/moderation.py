@@ -1,5 +1,6 @@
-import discord
 import datetime
+import logging
+import discord
 from discord.ext import commands
 
 class ModerationCog(commands.Cog):
@@ -11,7 +12,7 @@ class ModerationCog(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         '''Prints when cog is loaded.'''
-        print('Moderation Cog loaded.')
+        logging.info('Moderation Cog loaded.')
 
     
     @commands.command()

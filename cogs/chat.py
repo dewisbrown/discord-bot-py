@@ -1,3 +1,4 @@
+import logging
 import os
 import requests
 from dotenv import load_dotenv
@@ -11,7 +12,7 @@ class ChatCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        print('Chat Cog loaded.')
+        logging.info('Chat Cog loaded.')
 
 
     @commands.command()

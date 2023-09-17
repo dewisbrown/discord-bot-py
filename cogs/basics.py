@@ -1,3 +1,4 @@
+import logging
 import discord
 import pytz
 import datetime
@@ -10,7 +11,7 @@ class BasicsCog(commands.Cog):
     
     @commands.Cog.listener()
     async def on_ready(self):
-        print('Basics Cog loaded.')
+        logging.info('Basics Cog loaded.')
 
 
     @commands.command()

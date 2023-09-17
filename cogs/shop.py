@@ -1,3 +1,4 @@
+import logging
 import os
 import random
 import sqlite3
@@ -26,7 +27,7 @@ class ShopCog(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         '''Print statment to ensure loads properly.'''
-        print('Shop Cog loaded.')
+        logging.info('Shop Cog loaded.')
 
     
     @commands.command()
