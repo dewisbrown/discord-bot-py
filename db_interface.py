@@ -1,3 +1,6 @@
+'''Using to minimize re-written code in cog files. 
+Provides a way to input and retreive data from database.'''
+
 import sqlite3
 
 def get_points(user_id):
@@ -54,3 +57,16 @@ def set_level(user_id, level):
     cursor.execute('UPDATE points SET level = ? WHERE user_id = ?', (level, user_id,))
     conn.commit()
     conn.close()
+
+
+def get_inventory(user_id):
+    '''Returns user inventory from inventory db table.'''
+    # Connect to the database
+    conn = sqlite3.connect('data/points.db')
+    cursor = conn.cursor()
+
+    # Return user inventory list
+    cursor.execute('''SELECT item_name, value, rarity
+                        FROM inventory
+                        WHERE user_id = ?''', (user_id,))
+    return cursor.fetchall()
