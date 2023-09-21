@@ -90,22 +90,23 @@ class ModerationCog(commands.Cog):
                 server_statuses[server_name] = server_status
 
             # Build embed
-            embed = discord.Embed(title='Discord Voice Status', timestamp=datetime.datetime.now())
+            embed = discord.Embed(title='Discord Voice Status', timestamp=datetime.datetime.now(), url='https://discordstatus.com/')
             embed.set_thumbnail(url='https://logodownload.org/wp-content/uploads/2017/11/discord-logo-0.png')
             embed.set_author(name=f'Requested by {ctx.author.name}', icon_url=ctx.author.avatar)
 
             # Check if the US East server is 'Operational'
             if 'US East' in server_statuses:
-                embed.add_field(name='US East', value={server_statuses["US East"]})
+                embed.add_field(name='US East', value=server_statuses["US East"])
 
             # Check if the US Central server is 'Operational'
             if 'US Central' in server_statuses:
-                embed.add_field(name='US Central', value={server_statuses["US Central"]})
+                embed.add_field(name='US Central', value=server_statuses["US Central"])
             
             await ctx.send(embed=embed)
         else:
             await ctx.send('US East and US Central status could not be found.')
             logging.error('Web scrape for discordstatus.com unsuccesful.')
+
 
 async def setup(bot):
     await bot.add_cog(ModerationCog(bot))
