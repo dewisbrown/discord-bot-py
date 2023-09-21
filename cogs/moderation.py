@@ -62,6 +62,8 @@ class ModerationCog(commands.Cog):
     
     @commands.command()
     async def discordstatus(self, ctx):
+        logging.info('discordstatus command submitted by [%s]', ctx.author.name)
+        
         # Define the URL of the Discord Status page
         url = "https://discordstatus.com/"
 
@@ -72,11 +74,38 @@ class ModerationCog(commands.Cog):
         if response.status_code == 200:
             # Parse the HTML content of the page
             soup = BeautifulSoup(response.text, 'html.parser')
-            
-            # Find the div element containing the US East server status
-            us_east_status = soup.find('div', {'class': 'status-inner-container', 'data-status-page-component-id': 'US_EAST'})
-            
 
+            # Find the div elements containing server information
+            server_divs = soup.find_all('div', class_='component-inner-container')
+
+            # Define dictionaries to store server statuses
+            server_statuses = {}
+
+            for server_div in server_divs:
+                # Extract server name and status
+                server_name = server_div.find('span', class_='name').text.strip()
+                server_status = server_div.find('span', class_='component-status').text.strip()
+
+                # Store server status in the dictionary
+                server_statuses[server_name] = server_status
+
+            # Build embed
+            embed = discord.Embed(title='Discord Voice Status', timestamp=datetime.datetime.now())
+            embed.set_thumbnail(url='https://logodownload.org/wp-content/uploads/2017/11/discord-logo-0.png')
+            embed.set_author(name=f'Requested by {ctx.author.name}', icon_url=ctx.author.avatar)
+
+            # Check if the US East server is 'Operational'
+            if 'US East' in server_statuses:
+                embed.add_field(name='US East', value={server_statuses["US East"]})
+
+            # Check if the US Central server is 'Operational'
+            if 'US Central' in server_statuses:
+                embed.add_field(name='US Central', value={server_statuses["US Central"]})
+            
+            await ctx.send(embed=embed)
+        else:
+            await ctx.send('US East and US Central status could not be found.')
+            logging.error('Web scrape for discordstatus.com unsuccesful.')
 
 async def setup(bot):
     await bot.add_cog(ModerationCog(bot))
