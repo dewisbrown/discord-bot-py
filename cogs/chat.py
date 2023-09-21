@@ -1,6 +1,4 @@
 import logging
-import discord
-import datetime
 import asyncio
 from discord.ext import commands
 from chatbot import chatbot_interface, add_new_answer
