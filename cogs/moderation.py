@@ -1,7 +1,9 @@
 import datetime
 import logging
 import discord
+import requests
 from discord.ext import commands
+from bs4 import BeautifulSoup
 
 class ModerationCog(commands.Cog):
     '''Commands for discord moderation.'''
@@ -57,6 +59,23 @@ class ModerationCog(commands.Cog):
         embed.add_field(name='', value='', inline=False)
 
         await ctx.send(embed=embed)
+    
+    @commands.command()
+    async def discordstatus(self, ctx):
+        # Define the URL of the Discord Status page
+        url = "https://discordstatus.com/"
+
+        # Send a GET request to the website
+        response = requests.get(url)
+
+        # Check if the request was successful (status code 200)
+        if response.status_code == 200:
+            # Parse the HTML content of the page
+            soup = BeautifulSoup(response.text, 'html.parser')
+            
+            # Find the div element containing the US East server status
+            us_east_status = soup.find('div', {'class': 'status-inner-container', 'data-status-page-component-id': 'US_EAST'})
+            
 
 
 async def setup(bot):
