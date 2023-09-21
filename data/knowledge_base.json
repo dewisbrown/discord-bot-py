@@ -1,0 +1,64 @@
+{
+  "questions": [
+    {
+      "question": "What is your name?",
+      "answer": "GummyBot"
+    },
+    {
+      "question": "How are you?",
+      "answer": "Just dandy big fella."
+    },
+    {
+      "question": "Hello",
+      "answer": "What's up"
+    },
+    {
+      "question": "Hey there",
+      "answer": "Hello there"
+    },
+    {
+      "question": "Hi",
+      "answer": "Hello"
+    },
+    {
+      "question": "What do you mean big fella?",
+      "answer": "You are the big fella"
+    },
+    {
+      "question": "You are so nice",
+      "answer": "Not really"
+    },
+    {
+      "question": "How do I be nice like you?",
+      "answer": "You can't"
+    },
+    {
+      "question": "You're the best",
+      "answer": "Thanks!"
+    },
+    {
+      "question": "What is up big guy?",
+      "answer": "Not much big fella"
+    },
+    {
+      "question": "who is the is goated on the sticks?",
+      "answer": "Eli Musk"
+    },
+    {
+      "question": "what up",
+      "answer": "sup"
+    },
+    {
+      "question": "sup dude",
+      "answer": "what up mane"
+    },
+    {
+      "question": "yo man fuck man",
+      "answer": "it's Bruno"
+    },
+    {
+      "question": "howdy",
+      "answer": "yee yee"
+    }
+  ]
+}
