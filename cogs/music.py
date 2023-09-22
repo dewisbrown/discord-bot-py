@@ -61,7 +61,7 @@ class MusicCog(commands.Cog):
                 song_info = download_yt.download(url, ctx.author.name)
                 queue.append(song_info)
 
-                await ctx.send(f'{note_emoji}  **{song_info["song_name"]}** added to the queue (`{song_info["song_duration"]}`) - at position {len(queue)}')
+                await ctx.reply(f'{note_emoji}  **{song_info["song_name"]}** added to the queue (`{song_info["song_duration"]}`) - at position {len(queue)}')
             except Exception as ex:
                 logging.error('Failed to add song to queue: %s', str(ex))
         else:
@@ -69,7 +69,7 @@ class MusicCog(commands.Cog):
                 # Download URL and get info
                 song_info = download_yt.download(url, ctx.author.name)
                 queue.append(song_info)
-                await ctx.send(f'{note_emoji}  Added **{song_info["song_name"]} (`{song_info["song_duration"]}`)** to begin playing.')
+                await ctx.reply(f'{note_emoji}  Added **{song_info["song_name"]} (`{song_info["song_duration"]}`)** to begin playing.')
 
                 # Join voice channel
                 voice_channel = ctx.author.voice.channel
@@ -116,7 +116,7 @@ class MusicCog(commands.Cog):
 
         if voice_client and voice_client.is_playing():
             voice_client.stop()
-            await ctx.send(f'{cowboy_emoji}  Skipped **{current_song["song_name"]}** ' /
+            await ctx.reply(f'{cowboy_emoji}  Skipped **{current_song["song_name"]}** ' /
                            f'- [`{current_song["song_duration"]}`]')
 
             if queue:
