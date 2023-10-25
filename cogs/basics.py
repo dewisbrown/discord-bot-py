@@ -1,4 +1,5 @@
 import logging
+import random
 import discord
 import pytz
 import datetime
@@ -39,6 +40,21 @@ class BasicsCog(commands.Cog):
             await ctx.send(f'{user.display_name} has been in the server {days_in_server} days.')
         else:
             await ctx.send('This command is only applicable in a server (guild) context')
+    
+
+    @commands.command()
+    async def game(self, ctx, *args):
+        '''User inputs game titles and the command returns a random title.'''
+        logging.info('Game command submitted by [%s]', ctx.author.name)
+        games = list(args)
+
+        if not games:
+            await ctx.send("No arguments provided.")
+            return
+
+        random_choice = random.choice(games)
+
+        await ctx.send(f'You should play {random_choice}.')
 
 
 async def setup(bot):
