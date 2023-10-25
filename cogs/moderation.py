@@ -36,7 +36,7 @@ class ModerationCog(commands.Cog):
                     `$inventory` - Displays user inventory.\n
                     `$shop` - Displays shop items and values, refreshes every thirty minutes.'''
         
-        translate_commands = '''`$translate <target_language> <text_to_translate>` - Translates text using Google Translate.'''
+        #translate_commands = '''`$translate <target_language> <text_to_translate>` - Translates text using Google Translate.'''
         
         music_commands = '''`$play <youtube_url>` - Plays supplied YouTube video audio in voice channel.\n
                     `$queue` - Displays the music queue.\n
@@ -46,6 +46,9 @@ class ModerationCog(commands.Cog):
                     `$shuffle` - Shuffles music queue.\n
                     `$move <target_song_index> <target_index>` - Moves song in queue to a different queue position.'''
         
+        misc_commands = '''`$game <title1> <title2> ...` - Bot selects random game title out of provided game titles.\n
+                    `$age` - Displays user time since joining server.'''
+        
         # All commands
         embed.add_field(name='Battlepass Commands', value=battlepass_commands, inline=False)
         embed.add_field(name='', value='', inline=False)
@@ -53,9 +56,11 @@ class ModerationCog(commands.Cog):
         embed.add_field(name='', value='', inline=False)
         embed.add_field(name='Shop Commands', value=shop_commands, inline=False)
         embed.add_field(name='', value='', inline=False)
-        embed.add_field(name='Translate Commands', value=translate_commands, inline=False)
-        embed.add_field(name='', value='', inline=False)
+        #embed.add_field(name='Translate Commands', value=translate_commands, inline=False)
+        #embed.add_field(name='', value='', inline=False)
         embed.add_field(name='Music Commands', value=music_commands, inline=False)
+        embed.add_field(name='', value='', inline=False)
+        embed.add_field(name='Misc Commands', value=misc_commands, inline=False)
         embed.add_field(name='', value='', inline=False)
 
         await ctx.send(embed=embed)
