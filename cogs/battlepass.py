@@ -1,12 +1,8 @@
 import logging
-import sqlite3
 import datetime
-import os
 import discord
-import db_interface as db
 from discord.ext import commands
-
-db_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'points.db')
+import db_interface as db
 
 def get_points_to_level(level):
     '''Helper function to let bot know how many points it cost to tier up.'''
