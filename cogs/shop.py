@@ -109,7 +109,7 @@ class ShopCog(commands.Cog):
                 if points >= item_value:
                     # Deduct item value from user points
                     cursor.execute('''UPDATE points SET points = points - ? WHERE user_id = ?''', (item_value, user_id,))
-                    
+
                     # Insert item into user inventory
                     purchase_date = datetime.datetime.now()
                     cursor.execute('''INSERT INTO inventory (user_id, item_name, value, rarity, purchase_date) VALUES (?, ?, ?, ?, ?)''', (user_id, item, item_value, item_rarity, purchase_date,))
