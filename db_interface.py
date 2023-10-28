@@ -61,14 +61,27 @@ def get_last_awarded_at(user_id):
         return None
 
 
-def set_points(user_id, points, current_time):
+def set_last_awarded_at(user_id, current_time):
+    '''Updates last_awarded_at timestamp in db.'''
+    # Connect to the database
+    conn = sqlite3.connect('data/points.db')
+    cursor = conn.cursor()
+
+    # Check the last awarded timestamp for the user
+    cursor.execute('''UPDATE points SET last_awarded_at = ? 
+                   WHERE user_id = ?''', (current_time, user_id))
+    conn.commit()
+    conn.close()
+
+
+def set_points(user_id, points):
     '''Updates user points in db.'''
     # Connect to the database
     conn = sqlite3.connect('data/points.db')
     cursor = conn.cursor()
 
     # Check the last awarded timestamp for the user
-    cursor.execute('UPDATE points SET points = ?, last_awarded_at = ? WHERE user_id = ?', (points, current_time, user_id))
+    cursor.execute('UPDATE points SET points = ? WHERE user_id = ?', (points, user_id))
     conn.commit()
     conn.close()
 
@@ -127,3 +140,15 @@ def add_to_inventory(user_id, item, item_value, item_rarity, purchase_date):
                    (user_id, item, item_value, item_rarity, purchase_date))
     conn.commit()
     conn.close()
+
+
+def get_top_five():
+    '''Returns top 5 users sorted by level and points.'''
+    # Connect to the database
+    conn = sqlite3.connect('data/points.db')
+    cursor = conn.cursor()
+
+    # Checks top 5 users
+    cursor.execute('''SELECT user_name, level, points FROM points
+                   ORDER BY level DESC, points DESC LIMIT 5''')
+    return cursor.fetchall()
