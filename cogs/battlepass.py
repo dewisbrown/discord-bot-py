@@ -93,7 +93,8 @@ class BattlepassCog(commands.Cog):
                 points = db.get_points(user_id)
                 points_to_increment = get_points_for_command(level)
 
-                db.set_points(user_id=user_id, points=(points_to_increment + points), current_time=current_time)
+                db.set_points(user_id=user_id, points=(points_to_increment + points))
+                db.set_last_awarded_at(user_id=user_id, current_time=current_time)
 
                 embed = discord.Embed(title='Battlepass Points', timestamp=current_time)
                 embed.set_author(name=f'Requested by {ctx.author.name}', icon_url=ctx.author.avatar)
@@ -123,23 +124,17 @@ class BattlepassCog(commands.Cog):
         logging.info('Tierup command submitted by [%s]', ctx.author.name)
         user_id = ctx.author.id
 
-        # Connect to the database
-        conn = sqlite3.connect(db_path)
-        cursor = conn.cursor()
+        current_level = db.get_level(user_id=user_id)
+        points = db.get_points(user_id=user_id)
 
-        # Check the user's current level and points
-        cursor.execute('SELECT level, points FROM points WHERE user_id = ?', (user_id,))
-        result = cursor.fetchone()
-
-        if result:
-            current_level, points = result
+        if points:
             points_to_level_up = get_points_to_level(current_level)
             embed = discord.Embed(title='Battlepass Tier Up', timestamp=datetime.datetime.now())
             embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar)
 
             if points >= points_to_level_up:
-                cursor.execute('UPDATE points SET points = points - ?, level = level + 1 WHERE user_id = ?', (points_to_level_up, user_id,))
-                conn.commit()
+                db.set_level(user_id=user_id, level=(current_level + 1))
+                db.set_points(user_id=user_id, points=(points - points_to_level_up))
 
                 embed.set_thumbnail(url='https://res.cloudinary.com/teepublic/image/private/s--V423wCbg--/t_Resized%20Artwork/c_fit,g_north_west,h_954,w_954/co_000000,e_outline:48/co_000000,e_outline:inner_fill:48/co_ffffff,e_outline:48/co_ffffff,e_outline:inner_fill:48/co_bbbbbb,e_outline:3:1000/c_mpad,g_center,h_1260,w_1260/b_rgb:eeeeee/t_watermark_lock/c_limit,f_auto,h_630,q_90,w_630/v1535464012/production/designs/3077990_0.jpg')
                 embed.add_field(name=f'You leveled up to level: {current_level + 1}', value=f'Points after tier up: {points - points_to_level_up}', inline=False)
@@ -149,8 +144,6 @@ class BattlepassCog(commands.Cog):
                 await ctx.send(embed=embed)
         else:
             await ctx.send('You\'re not registered in the database yet. Use `$register` to enter yourself.')
-        
-        conn.close()
 
 
     @commands.command()
@@ -159,49 +152,33 @@ class BattlepassCog(commands.Cog):
         logging.info('Battlepass command submitted by [%s]', ctx.author.name)
         user_id = ctx.author.id
 
-        # Connect to the database
-        conn = sqlite3.connect(db_path)
-        cursor = conn.cursor()
+        # Get user points and level
+        points = db.get_points(user_id)
+        level = db.get_level(user_id)
 
-        # Check the user points
-        cursor.execute('SELECT points, level FROM points WHERE user_id = ?', (user_id,))
-        result = cursor.fetchone()
-
-        if result:
-            server_points, level = result
+        if points:
             embed = discord.Embed(title='Battlepass Progress', timestamp=datetime.datetime.now())
             embed.set_author(name=ctx.author.name)
             embed.set_thumbnail(url=ctx.author.avatar)
-            embed.add_field(name=f'Level: {level}', value=f'Points: {server_points}', inline=False)
+            embed.add_field(name=f'Level: {level}', value=f'Points: {points}', inline=False)
             await ctx.send(embed=embed)
         else:
             await ctx.send('You\'re not registered in the points system yet. Use the `$register` command to get started.')
-        
-        conn.close()
 
 
     @commands.command()
     async def top5(self, ctx):
         '''Returns the top 5 battlepass members.'''
         logging.info('Top5 command submitted by [%s]', ctx.author.name)
-        
-        # Connect to the database
-        conn = sqlite3.connect(db_path)
-        cursor = conn.cursor()
-
-        # Checks top 5 users
-        cursor.execute('SELECT user_name, level, points FROM points ORDER BY level DESC, points DESC LIMIT 5')
-        results = cursor.fetchall()
-
         embed = discord.Embed(title='Top 5 Battlepass Members', description='Sorted by level and points.', timestamp=datetime.datetime.now())
         embed.set_thumbnail(url='https://ih1.redbubble.net/image.660900869.4748/pp,504x498-pad,600x600,f8f8f8.u8.jpg')
-        
+
+        results = db.get_top_five()
         for result in results:
             user_name, level, points = result
             embed.add_field(name=user_name, value=f'Level: {level} Points: {points}', inline=False)
-        
+
         await ctx.send(embed=embed)
-        conn.close()
 
 
 async def setup(bot):
