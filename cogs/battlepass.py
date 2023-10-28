@@ -3,6 +3,7 @@ import sqlite3
 import datetime
 import os
 import discord
+import db_interface as db
 from discord.ext import commands
 
 db_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'points.db')
@@ -86,16 +87,9 @@ class BattlepassCog(commands.Cog):
         logging.info('Points command submitted by [%s]', ctx.author.name)
         user_id = ctx.author.id
 
-        # Connect to the database
-        conn = sqlite3.connect(db_path)
-        cursor = conn.cursor()
+        last_awarded_at_str = db.get_last_awarded_at(user_id)
 
-        # Check the last awarded timestamp for the user
-        cursor.execute('SELECT last_awarded_at, level FROM points WHERE user_id = ?', (user_id,))
-        result = cursor.fetchone()
-
-        if result:
-            last_awarded_at_str, level = result
+        if last_awarded_at_str:
             last_awarded_at = datetime.datetime.strptime(last_awarded_at_str, '%Y-%m-%d %H:%M:%S.%f')
             current_time = datetime.datetime.now()
             time_since_last_awarded = current_time - last_awarded_at
@@ -103,29 +97,22 @@ class BattlepassCog(commands.Cog):
 
             # Check if it has been at least 15 minutes
             if time_since_last_awarded.total_seconds() >= 900: # 15 minutes
+                level = db.get_level(user_id)
+                points = db.get_points(user_id)
                 points_to_increment = get_points_for_command(level)
-                cursor.execute('UPDATE points SET points = points + ?, last_awarded_at = ? WHERE user_id = ?', (points_to_increment, current_time, user_id))
-                conn.commit()
 
-                cursor.execute('SELECT points FROM points WHERE user_id = ?', (user_id,))
-                points = cursor.fetchone()
+                db.set_points(user_id=user_id, points=(points_to_increment + points), current_time=current_time)
 
-                if points:
-                    points = points[0]
+                embed = discord.Embed(title='Battlepass Points', timestamp=current_time)
+                embed.set_author(name=f'Requested by {ctx.author.name}', icon_url=ctx.author.avatar)
+                embed.set_thumbnail(url='https://cdn4.iconfinder.com/data/icons/stack-of-coins/100/coin-03-512.png')
+                embed.add_field(name=f'You\'ve been awarded {points_to_increment} points!', value=f'Updated points: {points + points_to_increment}', inline=False)
+                embed.add_field(name='', value=f'Your next redemption time is: {(current_time + datetime.timedelta(minutes=15)).strftime("%Y-%m-%d %I:%M %p")}', inline=False)
+                await ctx.send(embed=embed)
 
-                    embed = discord.Embed(title='Battlepass Points', timestamp=current_time)
-                    embed.set_author(name=f'Requested by {ctx.author.name}', icon_url=ctx.author.avatar)
-                    embed.set_thumbnail(url='https://cdn4.iconfinder.com/data/icons/stack-of-coins/100/coin-03-512.png')
-                    embed.add_field(name=f'You\'ve been awarded {points_to_increment} points!', value=f'Updated points: {points}', inline=False)
-                    embed.add_field(name='', value=f'Your next redemption time is: {(current_time + datetime.timedelta(minutes=15)).strftime("%Y-%m-%d %I:%M %p")}', inline=False)
-                    await ctx.send(embed=embed)
+                logging.info('Successfully awarded %d points to [%s].', points_to_increment, ctx.author.name)
 
-                    logging.info('Successfully awarded %d points to [%s].', points_to_increment, ctx.author.name)
-                else:
-                    await ctx.send('Something went wrong...')
-                    logging.error('Failed to select points from db for [%s]', ctx.author.name)
-
-            else: 
+            else:
                 embed = discord.Embed(title='Battlepass Points', timestamp=current_time)
                 embed.set_author(name=f'Requested by {ctx.author.name}', icon_url=ctx.author.avatar)
                 embed.add_field(name='', value='Sorry, you can only claim points every 15 minutes.', inline=False)
@@ -136,8 +123,6 @@ class BattlepassCog(commands.Cog):
         else:
             await ctx.send('You\'re not registered in the points system yet. Use the `$register` command to get started.')
             logging.info('[%s] attempted to earn points without being registered to battlepass.', ctx.author.name)
-
-        conn.close()
 
 
     @commands.command()
