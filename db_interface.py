@@ -3,6 +3,30 @@ Provides a way to input and retreive data from database.'''
 
 import sqlite3
 
+def get_user_id(user_id):
+    '''Checks if user is in points table already.'''
+    # Connect to the database
+    conn = sqlite3.connect('data/points.db')
+    cursor = conn.cursor()
+
+    # Check if the user is already registered
+    cursor.execute('SELECT user_id FROM points WHERE user_id = ?', (user_id,))
+    return cursor.fetchone()
+
+
+def add_user(user_id, last_awarded_at, user_name):
+    '''Adds user to points table.'''
+    # Connect to the database
+    conn = sqlite3.connect('data/points.db')
+    cursor = conn.cursor()
+
+    cursor.execute('''INSERT INTO points (
+                   user_id, points, last_awarded_at, 
+                   level, user_name) VALUES (?, ?, ?, ?, ?)''', 
+                   (user_id, 100, last_awarded_at, 1, user_name))
+    conn.commit()
+
+
 def get_points(user_id):
     '''Returns the points of the user from the db.'''
     # Connect to the database
@@ -11,6 +35,23 @@ def get_points(user_id):
 
     # Check the last awarded timestamp for the user
     cursor.execute('SELECT points FROM points WHERE user_id = ?', (user_id,))
+    result = cursor.fetchone()
+    conn.close()
+
+    if result:
+        return result[0]
+    else:
+        return None
+
+
+def get_last_awarded_at(user_id):
+    '''Returns timestamp of last points redemption.'''
+    # Connect to the database
+    conn = sqlite3.connect('data/points.db')
+    cursor = conn.cursor()
+
+    # Check the last awarded timestamp for the user
+    cursor.execute('SELECT last_awarded_at FROM points WHERE user_id = ?', (user_id,))
     result = cursor.fetchone()
     conn.close()
 
