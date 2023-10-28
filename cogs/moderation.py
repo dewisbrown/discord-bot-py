@@ -16,7 +16,7 @@ class ModerationCog(commands.Cog):
         '''Prints when cog is loaded.'''
         logging.info('Moderation Cog loaded.')
 
-    
+
     @commands.command()
     async def help(self, ctx):
         '''Lists bot commands.'''
@@ -27,17 +27,17 @@ class ModerationCog(commands.Cog):
                     `$register` - Register for battlepass.\n
                     `$tierup` - Spend points to increase battlepass level.\n
                     `$top5` - Displays top 5 battlepass members.'''
-        
+
         ed_commands = '''`$addquote <quote>` - Adds supplied quote to list of Ed quotes.\n
                     `$edquote` - Displays a random quote from the list of Ed quotes.\n
                     `$edrandom` - Displays a random picture of Ed.'''
-        
+
         shop_commands = '''`$buy <item_name>` - Purchase item from item shop.\n
                     `$inventory` - Displays user inventory.\n
                     `$shop` - Displays shop items and values, refreshes every thirty minutes.'''
-        
+
         #translate_commands = '''`$translate <target_language> <text_to_translate>` - Translates text using Google Translate.'''
-        
+
         music_commands = '''`$play <youtube_url>` - Plays supplied YouTube video audio in voice channel.\n
                     `$queue` - Displays the music queue.\n
                     `$stop` - Stops the music player and the bot exits the voice channel.\n
@@ -45,10 +45,10 @@ class ModerationCog(commands.Cog):
                     `$seek <time_stamp>` - Plays song at supplied time stamp.\n
                     `$shuffle` - Shuffles music queue.\n
                     `$move <target_song_index> <target_index>` - Moves song in queue to a different queue position.'''
-        
+
         misc_commands = '''`$game <title1> <title2> ...` - Bot selects random game title out of provided game titles.\n
                     `$age` - Displays user time since joining server.'''
-        
+
         # All commands
         embed.add_field(name='Battlepass Commands', value=battlepass_commands, inline=False)
         embed.add_field(name='', value='', inline=False)
@@ -64,7 +64,7 @@ class ModerationCog(commands.Cog):
         embed.add_field(name='', value='', inline=False)
 
         await ctx.send(embed=embed)
-    
+
     @commands.command()
     async def discordstatus(self, ctx):
         '''Displays status of discord voice (US/East, US/Central)'''
@@ -107,7 +107,7 @@ class ModerationCog(commands.Cog):
             # Check if the US Central server is 'Operational'
             if 'US Central' in server_statuses:
                 embed.add_field(name='US Central', value=server_statuses["US Central"])
-            
+
             await ctx.send(embed=embed)
         else:
             await ctx.send('US East and US Central status could not be found.')
