@@ -67,8 +67,9 @@ class ModerationCog(commands.Cog):
     
     @commands.command()
     async def discordstatus(self, ctx):
+        '''Displays status of discord voice (US/East, US/Central)'''
         logging.info('discordstatus command submitted by [%s]', ctx.author.name)
-        
+
         # Define the URL of the Discord Status page
         url = "https://discordstatus.com/"
 
