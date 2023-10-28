@@ -71,3 +71,18 @@ def get_inventory(user_id):
                         WHERE user_id = ?''', (user_id,))
     # for item in items -> item_name = item[0], value = item[1], rarity = item[2]
     return cursor.fetchall()
+
+
+def add_to_inventory(user_id, item, item_value, item_rarity, purchase_date):
+    '''Addes item to user inventory.'''
+    # Connect to the database
+    conn = sqlite3.connect('data/points.db')
+    cursor = conn.cursor()
+
+    # Extract data from item_info and add to inventory
+    cursor.execute('''INSERT INTO inventory
+                   (user_id, item_name, value, rarity, purchase_date) 
+                   VALUES (?, ?, ?, ?, ?)''',
+                   (user_id, item, item_value, item_rarity, purchase_date))
+    conn.commit()
+    conn.close()
