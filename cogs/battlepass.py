@@ -53,7 +53,7 @@ class BattlepassCog(commands.Cog):
         user_name = ctx.author.name
         registration_timestamp = datetime.datetime.now()
 
-        result = db.get_user_id(user_id)
+        result = db.get_user_id(user_id=user_id)
 
         if result:
             await ctx.send("You are already registered.")
@@ -75,7 +75,7 @@ class BattlepassCog(commands.Cog):
         logging.info('Points command submitted by [%s]', ctx.author.name)
         user_id = ctx.author.id
 
-        last_awarded_at_str = db.get_last_awarded_at(user_id)
+        last_awarded_at_str = db.get_last_awarded_at(user_id=user_id)
 
         if last_awarded_at_str:
             last_awarded_at = datetime.datetime.strptime(last_awarded_at_str, '%Y-%m-%d %H:%M:%S.%f')
@@ -85,8 +85,8 @@ class BattlepassCog(commands.Cog):
 
             # Check if it has been at least 15 minutes
             if time_since_last_awarded.total_seconds() >= 900: # 15 minutes
-                level = db.get_level(user_id)
-                points = db.get_points(user_id)
+                level = db.get_level(user_id=user_id)
+                points = db.get_points(user_id=user_id)
                 points_to_increment = get_points_for_command(level)
 
                 db.set_points(user_id=user_id, points=(points_to_increment + points))
@@ -149,8 +149,8 @@ class BattlepassCog(commands.Cog):
         user_id = ctx.author.id
 
         # Get user points and level
-        points = db.get_points(user_id)
-        level = db.get_level(user_id)
+        points = db.get_points(user_id=user_id)
+        level = db.get_level(user_id=user_id)
 
         if points:
             embed = discord.Embed(title='Battlepass Progress', timestamp=datetime.datetime.now())
