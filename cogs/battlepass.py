@@ -52,24 +52,17 @@ class BattlepassCog(commands.Cog):
     async def register(self, ctx):
         '''Enters user into battlepass database.'''
         logging.info('Register command submitted by [%s]', ctx.author.name)
-        
+
         user_id = ctx.author.id
         user_name = ctx.author.name
         registration_timestamp = datetime.datetime.now()
 
-        # Connect to the database
-        conn = sqlite3.connect(db_path)
-        cursor = conn.cursor()
-
-        # Check if the user is already registered
-        cursor.execute('SELECT user_id FROM points WHERE user_id = ?', (user_id,))
-        result = cursor.fetchone()
+        result = db.get_user_id(user_id)
 
         if result:
             await ctx.send("You are already registered.")
         else:
-            cursor.execute('INSERT INTO points (user_id, points, last_awarded_at, level, user_name) VALUES (?, ?, ?, ?, ?)', (user_id, 100, registration_timestamp, 1, user_name))
-            conn.commit()
+            db.add_user(user_id=user_id, last_awarded_at=registration_timestamp, user_name=user_name)
 
             embed = discord.Embed(title='Battlepass Registration', timestamp=registration_timestamp)
             embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar)
@@ -78,7 +71,6 @@ class BattlepassCog(commands.Cog):
             await ctx.send(embed=embed)
 
             logging.info('[%s] successfully registered for battlepass.', user_name)
-        conn.close()
 
 
     @commands.command()
