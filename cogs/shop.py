@@ -1,22 +1,12 @@
 import logging
-import os
-import random
-import sqlite3
 import datetime
-import json
 import discord
 import pytz
 from discord.ext import commands, tasks
 import db_interface as db
 
-db_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'points.db')
-shop_path = os.path.join(os.path.dirname(__file__), '..', 'shop.csv')
 shop = []
 refresh_time = datetime.datetime.now()
-
-# Load categorized items from JSON file for item shop functions/commands
-with open('./categorized_items.json', 'r', encoding='utf-8') as json_file:
-        categorized_items = json.load(json_file)
 
 class ShopCog(commands.Cog):
     '''Commands for viewing item shop, buying, and viewing own inventory.'''
@@ -30,7 +20,7 @@ class ShopCog(commands.Cog):
         '''Print statment to ensure loads properly.'''
         logging.info('Shop Cog loaded.')
 
-    
+
     @commands.command()
     async def shop(self, ctx):
         '''Prints the shop items and values.'''
@@ -41,9 +31,9 @@ class ShopCog(commands.Cog):
         for item in shop:
             item_name, item_value, item_rarity = item
             embed.add_field(name=item_name, value=f'Points: {item_value} - Rarity: {item_rarity}', inline=False)
-        
+
         await ctx.send(embed=embed)
-    
+
 
     @commands.command()
     async def inventory(self, ctx):
@@ -63,63 +53,61 @@ class ShopCog(commands.Cog):
 
 
     @commands.command()
-    async def buy(self, ctx, *, item):
+    async def buy(self, ctx, *, item_name):
         '''Purchase item from shop.'''
         user_id = ctx.author.id
 
-        # Check if user has item already
-        conn = sqlite3.connect(db_path)
-        cursor = conn.cursor()
+        # Check if user is registered for battlepass
+        user = db.get_user_id(user_id=user_id)
+        if user is None:
+            await ctx.send('''Register for the battlepass to earn 
+                           points and purchase items by using the 
+                           `$register` command.''')
+            return
 
-        cursor.execute('''SELECT item_name FROM inventory WHERE user_id = ?''', (user_id,))
-        items = cursor.fetchall()
+        # Check if item is currently in shop
+        if item_name not in [item[0] for item in shop]:
+            await ctx.send(f'{item_name} is not in the shop. Use `$shop` to see items in the shop.')
+            return
 
-        if items:
-            item_names = [item[0] for item in items]
-            if item in item_names:
-                await ctx.send('You already own this item.')
-                return
+        # Check if user already owns the item
+        owned_item = db.get_owned_item(user_id=user_id, item_name=item_name)
+        if owned_item:
+            await ctx.send('You already own this item.')
+            return
 
-        # Check if item is in shop
-        if item in shop:
-            item_value = int(shop[item]['value'])
-            item_rarity = shop[item]['rarity']
+        # Check if user has enough points to purchase item
+        points = int(db.get_points(user_id=user_id))
+        for item in shop:
+            if item_name == item[0]:
+                item_value = item[1]
+                item_rarity = item[2]
+                break
 
-            # Check if user has enough points to purchase
-            cursor.execute('''SELECT points FROM points WHERE user_id = ?''', (user_id,))
-            points = cursor.fetchone()
+        embed = discord.Embed(title='Item Purchase', timestamp=datetime.datetime.now())
+        embed.set_author(name=f'Requested by {ctx.author.name}', icon_url=ctx.author.avatar)
 
-            if points:
-                points = int(points[0])
+        if points >= item_value:
+            # Deduct item value from user points
+            db.set_points(user_id=user_id, points=points - item_value)
 
-                embed = discord.Embed(title='Item Purchase', timestamp=datetime.datetime.now())
-                embed.set_author(name=f'Requested by {ctx.author.name}', icon_url=ctx.author.avatar)
+            # Add item to user inventory
+            db.add_to_inventory(
+                user_id=user_id,
+                item_name=item_name,
+                item_value=item_value,
+                item_rarity=item_rarity,
+                purchase_date=datetime.datetime.now())
 
-                if points >= item_value:
-                    # Deduct item value from user points
-                    cursor.execute('''UPDATE points SET points = points - ? WHERE user_id = ?''', (item_value, user_id,))
-
-                    # Insert item into user inventory
-                    purchase_date = datetime.datetime.now()
-                    cursor.execute('''INSERT INTO inventory (user_id, item_name, value, rarity, purchase_date) VALUES (?, ?, ?, ?, ?)''', (user_id, item, item_value, item_rarity, purchase_date,))
-
-                    conn.commit()
-                    conn.close()
-
-                    embed.add_field(name=f'{item} has been added to your inventory', value='View your inventory by using `$inventory`.', inline=False)
-                    embed.add_field(name='', value=f'Points after purchase: {points - item_value}', inline=False)
-                    await ctx.send(embed=embed)
-                else:
-                    embed.add_field(name=f'You do not have enough points to purchase {item}.', value='', inline=False)
-                    embed.add_field(name='', value=f'Your points: {points}', inline=False)
-                    embed.add_field(name='', value=f'{item}: {item_value} points.', inline=False)
-                    await ctx.send(embed=embed)
-            else:
-                await ctx.send('Register for the battlepass to earn points and purchase items by using the `$register` command.')
+            embed.add_field(name=f'{item_name} has been added to your inventory', value='View your inventory by using `$inventory`.', inline=False)
+            embed.add_field(name='', value=f'Points after purchase: {points - item_value}', inline=False)
         else:
-            await ctx.send(f'{item} is not in the shop. Use `$shop` to see items in the shop.')
+            embed.add_field(name=f'You do not have enough points to purchase {item_name}.', value='', inline=False)
+            embed.add_field(name='', value=f'Your points: {points}', inline=False)
+            embed.add_field(name='', value=f'{item_name}: {item_value} points.', inline=False)
+        await ctx.send(embed=embed)
 
-    
+
 @tasks.loop(minutes=30)
 async def refresh_shop():
     '''Updates shop with five new items every thirty minutes.'''
