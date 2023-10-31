@@ -49,16 +49,7 @@ class ShopCog(commands.Cog):
     async def inventory(self, ctx):
         '''Lists the user's inventory.'''
         user_id = ctx.author.id
-
-        # Connect to database
-        conn = sqlite3.connect(db_path)
-        cursor = conn.cursor()
-
-        # Return user inventory list
-        cursor.execute('''SELECT item_name, value, rarity
-                            FROM inventory
-                            WHERE user_id = ?''', (user_id,))
-        items = cursor.fetchall()
+        items = db.get_inventory(user_id=user_id)
 
         if items:
             embed = discord.Embed(title='Inventory', timestamp=datetime.datetime.now())
@@ -69,8 +60,6 @@ class ShopCog(commands.Cog):
             await ctx.send(embed=embed)
         else:
             await ctx.send('Your inventory is empty.')
-        
-        conn.close()
 
 
     @commands.command()
