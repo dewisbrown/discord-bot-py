@@ -152,3 +152,32 @@ def get_top_five():
     cursor.execute('''SELECT user_name, level, points FROM points
                    ORDER BY level DESC, points DESC LIMIT 5''')
     return cursor.fetchall()
+
+
+def get_shop_items():
+    '''Retrieves items from item shop db table.'''
+    # Can be rarity counts can be changed at any time
+    rarity_counts = {
+        'Legendary': 1,
+        'Exotic': 1,
+        'Very Rare': 1,
+        'Rare': 1,
+        'Uncommon': 2,
+        'Common': 3
+    }
+
+    # Connect to sqlite database (make new if doesn't exist)
+    conn = sqlite3.connect('data/points.db')
+
+    # Create a cursor object to execute SQL commands
+    cursor = conn.cursor()
+
+    selected_items = []
+
+    for rar, count in rarity_counts.items():
+        query = 'SELECT * FROM shop WHERE rarity = ? ORDER BY RANDOM() LIMIT ?'
+        cursor.execute(query, (rar, count))
+        selected_items.extend(cursor.fetchall())
+
+    conn.close()
+    return selected_items
