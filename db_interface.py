@@ -38,10 +38,7 @@ def get_points(user_id):
     result = cursor.fetchone()
     conn.close()
 
-    if result:
-        return result[0]
-    else:
-        return None
+    return result[0]
 
 
 def get_last_awarded_at(user_id):
@@ -127,7 +124,7 @@ def get_inventory(user_id):
     return cursor.fetchall()
 
 
-def add_to_inventory(user_id, item, item_value, item_rarity, purchase_date):
+def add_to_inventory(user_id, item_name, item_value, item_rarity, purchase_date):
     '''Addes item to user inventory.'''
     # Connect to the database
     conn = sqlite3.connect('data/points.db')
@@ -137,7 +134,7 @@ def add_to_inventory(user_id, item, item_value, item_rarity, purchase_date):
     cursor.execute('''INSERT INTO inventory
                    (user_id, item_name, value, rarity, purchase_date) 
                    VALUES (?, ?, ?, ?, ?)''',
-                   (user_id, item, item_value, item_rarity, purchase_date))
+                   (user_id, item_name, item_value, item_rarity, purchase_date))
     conn.commit()
     conn.close()
 
@@ -174,10 +171,24 @@ def get_shop_items():
 
     selected_items = []
 
-    for rar, count in rarity_counts.items():
+    for rarity, count in rarity_counts.items():
         query = 'SELECT * FROM shop WHERE rarity = ? ORDER BY RANDOM() LIMIT ?'
-        cursor.execute(query, (rar, count))
+        cursor.execute(query, (rarity, count))
         selected_items.extend(cursor.fetchall())
 
     conn.close()
     return selected_items
+
+
+def get_owned_item(user_id, item_name):
+    '''This function is used to check if a user already owns an item.'''
+    # Connect to sqlite database (make new if doesn't exist)
+    conn = sqlite3.connect('data/points.db')
+
+    # Create a cursor object to execute SQL commands
+    cursor = conn.cursor()
+
+    query = 'SELECT item_name FROM inventory WHERE user_id = ? AND item_name = ?'
+    cursor.execute(query, (user_id, item_name))
+
+    return cursor.fetchone()
