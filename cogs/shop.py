@@ -7,10 +7,11 @@ import json
 import discord
 import pytz
 from discord.ext import commands, tasks
+import db_interface as db
 
 db_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'points.db')
 shop_path = os.path.join(os.path.dirname(__file__), '..', 'shop.csv')
-shop = {}
+shop = []
 refresh_time = datetime.datetime.now()
 
 # Load categorized items from JSON file for item shop functions/commands
@@ -37,9 +38,8 @@ class ShopCog(commands.Cog):
         embed.set_author(name=f'Requested by {ctx.author.name}', icon_url=ctx.author.avatar)
         embed.set_thumbnail(url='https://wallpapercave.com/wp/wp7879327.jpg')
 
-        for item_name, item_data in shop.items():
-            item_value = int(item_data['value'])
-            item_rarity = item_data['rarity']
+        for item in shop:
+            item_name, item_value, item_rarity = item
             embed.add_field(name=item_name, value=f'Points: {item_value} - Rarity: {item_rarity}', inline=False)
         
         await ctx.send(embed=embed)
@@ -135,38 +135,10 @@ class ShopCog(commands.Cog):
 async def refresh_shop():
     '''Updates shop with five new items every thirty minutes.'''
     global shop
-    new_shop = {}
+    shop = db.get_shop_items()
 
     current_time = datetime.datetime.now(pytz.timezone('US/Central'))
     set_shop_refresh_time(current_time + datetime.timedelta(minutes=30))
-
-    rarity_counts = {
-        'Legendary': 1,
-        'Exotic': 1,
-        'Very Rare': 1,
-        'Rare': 2,
-        'Uncommon': 2,
-        'Common': 3
-    }
-
-    # Keeps track of item names that have already been added to shop
-    added_items = []
-
-    # Select items from each category to reach the desired counts
-    for rarity, count in rarity_counts.items():
-        available_items = [item for item in categorized_items[rarity] if item['item_name'] not in added_items]
-        selected_items = random.sample(available_items, count)
-
-        for item_data in selected_items:
-            item_name = item_data['item_name']
-            value = item_data['value']
-            rarity = item_data['rarity']
-            new_shop[item_name] = {'value': value, 'rarity': rarity}
-
-            # Add item name to set of added items
-            added_items.append(item_name)
-
-    shop = new_shop
 
 
 def set_shop_refresh_time(timestamp):
