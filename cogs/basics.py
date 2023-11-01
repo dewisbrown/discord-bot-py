@@ -49,7 +49,7 @@ class BasicsCog(commands.Cog):
         games = list(args)
 
         if not games:
-            await ctx.send("No arguments provided.")
+            await ctx.send("No game titles provided.")
             return
 
         random_choice = random.choice(games)
