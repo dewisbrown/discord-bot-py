@@ -3,6 +3,8 @@ import random
 import discord
 import pytz
 import datetime
+import requests
+from bs4 import BeautifulSoup
 from discord.ext import commands
 
 class BasicsCog(commands.Cog):
@@ -56,6 +58,38 @@ class BasicsCog(commands.Cog):
 
         await ctx.send(f'You should play {random_choice}.')
 
+
+    @commands.command()
+    async def ufc(self, ctx):
+        '''Scrapes ufc site for fight information.'''
+        logging.info('Ufc command submitted by [%s]', ctx.author.name)
+
+        url = 'https://www.espn.com/mma/schedule/_/league/ufc'
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36',
+        }
+        response = requests.get(url, headers=headers)
+
+        if response.status_code == 200:
+            soup = BeautifulSoup(response.text, 'html.parser')
+
+            date_html = soup.find_all('td', class_='date__col', limit=8)
+            current_date = datetime.datetime.now()
+            event_html = soup.find_all('td', class_='event__col', limit=4)
+
+            embed = discord.Embed(title='', timestamp=current_date)
+            embed.set_thumbnail(url='https://logos-world.net/wp-content/uploads/2021/02/Ultimate-Fighting-Championship-UFC-Logo.png')
+
+            for i in range(0, len(date_html), 2):
+                date_str = date_html[i].text
+                event_date = datetime.datetime.strptime(date_str + " 2023", '%b %d %Y')
+                date = event_date.strftime('%B %d')
+                time = date_html[i + 1].text
+                event_title = event_html[i // 2].text
+                embed.add_field(name=event_title, value=f'{date} - {time}', inline=False)
+            await ctx.send(embed=embed)
+        else:
+            await ctx.send('Something went wrong...')
 
 async def setup(bot):
     await bot.add_cog(BasicsCog(bot))
