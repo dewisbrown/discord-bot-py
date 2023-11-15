@@ -86,7 +86,7 @@ class BasicsCog(commands.Cog):
                 date = event_date.strftime('%B %d')
                 time = date_html[i + 1].text
                 event_title = event_html[i // 2].text
-                embed.add_field(name=event_title, value=f'{date} - {time}', inline=False)
+                embed.add_field(name=event_title, value=f'{date} - {time} EST', inline=False)
             await ctx.send(embed=embed)
         else:
             await ctx.send('Something went wrong...')
