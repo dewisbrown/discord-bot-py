@@ -141,7 +141,7 @@ class MusicCog(commands.Cog):
     async def stop(self, ctx):
         '''Disconnects bot from voice channel and clears queue.'''
         logging.info('Stop command submitted by [%s]', ctx.author.name)
-        
+
         voice_client = ctx.voice_client
 
         if voice_client and voice_client.is_playing():
@@ -182,6 +182,32 @@ class MusicCog(commands.Cog):
             await ctx.send(f'Moved {queue[index1]["song_name"]} to position {index2} in queue.')
         else:
             await ctx.send('Invalid index input.')
+
+    # TODO: fix pause command
+    # @commands.command()
+    # async def pause(self, ctx):
+    #     '''Pauses audio playback in voice channel.'''
+    #     logging.info('Pause command submitted by [%s]', ctx.author.name)
+    #     voice_client = ctx.voice_client
+
+    #     if voice_client and voice_client.is_playing():
+    #         voice_client.pause()
+    #         await ctx.send(f'_{current_song["song_name"]}_ paused by {ctx.author.name}.')
+    #     else:
+    #         await ctx.send('There is no audio currently playing.')
+
+
+    @commands.command()
+    async def resume(self, ctx):
+        '''Resumes audio playback in voice channel.'''
+        logging.info('Resume command submitted by [%s]', ctx.author.name)
+        voice_client = ctx.voice_client
+
+        if voice_client and voice_client.is_paused():
+            voice_client.resume()
+            await ctx.send(f'_{current_song["song_name"]}_ has resumed playback.')
+        else:
+            await ctx.send('There is nothing paused at the moment.')
 
 
 async def setup(bot):
