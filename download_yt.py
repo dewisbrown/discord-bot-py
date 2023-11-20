@@ -5,10 +5,10 @@ from pytube import Search
 def download(url, request_author):
     '''Downloads YouTube video and returns YouTube video data.'''
     try:
-        if is_url(url):
+        if is_url(url): # check to see if user input from play command is a youtube url
             yt = YouTube(url)
         else:
-            yt = Search(url).results[0]
+            yt = Search(url).results[0] # first result of search query
 
         audio_stream = yt.streams.filter(only_audio=True).first()
         output_path = os.path.join(os.path.dirname(__file__), 'downloads')
