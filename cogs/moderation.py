@@ -39,15 +39,17 @@ class ModerationCog(commands.Cog):
         #translate_commands = '''`$translate <target_language> <text_to_translate>` - Translates text using Google Translate.'''
 
         music_commands = '''`$play <youtube_url>` - Plays supplied YouTube video audio in voice channel.\n
+                    `$play <search_terms>` - Plays first search result of YouTube video audio in voice channel.\n
                     `$queue` - Displays the music queue.\n
                     `$stop` - Stops the music player and the bot exits the voice channel.\n
                     `$skip` - Skips the current song playing.\n
-                    `$seek <time_stamp>` - Plays song at supplied time stamp.\n
                     `$shuffle` - Shuffles music queue.\n
                     `$move <target_song_index> <target_index>` - Moves song in queue to a different queue position.'''
 
         misc_commands = '''`$game <title1> <title2> ...` - Bot selects random game title out of provided game titles.\n
-                    `$age` - Displays user time since joining server.'''
+                    `$age` - Displays user time since joining server.\n
+                    `$updates` - Displays recent changes made to GummyBot.\n
+                    `$ufc` - Displays next four UFC event dates, times, and titles.'''
 
         # All commands
         embed.add_field(name='Battlepass Commands', value=battlepass_commands, inline=False)
