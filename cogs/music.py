@@ -38,15 +38,15 @@ class MusicCog(commands.Cog):
 
             embed.add_field(name='', value=message, inline=False)
             await ctx.send(embed=embed)
-        
+
         logging.info('Queue command submitted by [%s]', ctx.author.name)
 
 
     @commands.command()
-    async def play(self, ctx, url):
+    async def play(self, ctx, *, url):
         '''Plays the user submitted search terms in audio chat.'''
         logging.info('Play command submitted by [%s]', ctx.author.name)
-        
+
         if ctx.author.voice is None:
             await ctx.send('You must be in a voice channel to run this command.')
             logging.info('Play command failed: [%s] is not in voice channel.', ctx.author.name)
