@@ -1,10 +1,15 @@
 import os
 from pytube import YouTube
+from pytube import Search
 
 def download(url, request_author):
     '''Downloads YouTube video and returns YouTube video data.'''
     try:
-        yt = YouTube(url)
+        if is_url(url):
+            yt = YouTube(url)
+        else:
+            yt = Search(url).results[0]
+
         audio_stream = yt.streams.filter(only_audio=True).first()
         output_path = os.path.join(os.path.dirname(__file__), 'downloads')
         file_path = audio_stream.download(output_path=output_path)
@@ -18,6 +23,7 @@ def download(url, request_author):
         }
     except Exception as ex:
         print(str(ex))
+
 
 def format_time(seconds):
     '''Formats total seconds to %M:%S format.'''
@@ -36,3 +42,10 @@ def delete(file_path):
     else:
         print('The file path does not exist.')
         print(file_path)
+
+
+def is_url(user_input: str) -> bool:
+    '''Checks if input string is a YouTube url.'''
+    if 'https://www.youtube.com/' in user_input:
+        return True
+    return False
