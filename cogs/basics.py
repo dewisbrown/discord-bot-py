@@ -91,5 +91,26 @@ class BasicsCog(commands.Cog):
         else:
             await ctx.send('Something went wrong...')
 
+
+    @commands.command()
+    async def updates(self, ctx):
+        '''Bot changes and updates listed in embed.'''
+        # Update timestamp each time new updates are posted
+        embed = discord.Embed(title='GummyBot Updates', timestamp=datetime.datetime(year=2023, month=11, day=20, hour=9, minute=45))
+        embed.set_footer(text='Changes to the bot were made at the following timestamp')
+        embed.set_thumbnail(url='https://64.media.tumblr.com/84f68fd1ada52c9840b2dbe497f7eeb1/tumblr_ox2sd2eAXn1v64bqao5_r1_400.png')
+
+        # Input changes made, adjust when new features added
+        changes = [
+            ['`$play`', 'Added search functionality. User can submit a direct link or search terms. The first search result is used for playback.'],
+            ['`$updates`', 'Displays recent updates made to the bot.']
+        ]
+
+        for change in changes:
+            embed.add_field(name=change[0], value=change[1], inline=False)
+
+        await ctx.send(embed=embed)
+
+
 async def setup(bot):
     await bot.add_cog(BasicsCog(bot))
