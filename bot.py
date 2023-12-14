@@ -53,5 +53,7 @@ async def main():
         await load()
         await bot.start(os.getenv('BOT_TOKEN'))
 
-
-asyncio.run(main())
+try:
+    asyncio.run(main())
+except KeyboardInterrupt:
+    print('\nSession terminated...')
