@@ -2,11 +2,19 @@
 Provides a way to input and retreive data from database.'''
 
 import sqlite3
+import os
+from dotenv import load_dotenv
+
+
+# Load db file path from .env file
+load_dotenv()
+db_path = os.getenv('DB_PATH')
+
 
 def get_user_id(user_id):
     '''Checks if user is in points table already.'''
     # Connect to the database
-    conn = sqlite3.connect('data/points.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
     # Check if the user is already registered
@@ -17,7 +25,7 @@ def get_user_id(user_id):
 def add_user(user_id, last_awarded_at, user_name):
     '''Adds user to points table.'''
     # Connect to the database
-    conn = sqlite3.connect('data/points.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
     cursor.execute('''INSERT INTO points (
@@ -30,7 +38,7 @@ def add_user(user_id, last_awarded_at, user_name):
 def get_points(user_id):
     '''Returns the points of the user from the db.'''
     # Connect to the database
-    conn = sqlite3.connect('data/points.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
     # Check the last awarded timestamp for the user
@@ -44,7 +52,7 @@ def get_points(user_id):
 def get_last_awarded_at(user_id):
     '''Returns timestamp of last points redemption.'''
     # Connect to the database
-    conn = sqlite3.connect('data/points.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
     # Check the last awarded timestamp for the user
@@ -61,7 +69,7 @@ def get_last_awarded_at(user_id):
 def set_last_awarded_at(user_id, current_time):
     '''Updates last_awarded_at timestamp in db.'''
     # Connect to the database
-    conn = sqlite3.connect('data/points.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
     # Check the last awarded timestamp for the user
@@ -74,7 +82,7 @@ def set_last_awarded_at(user_id, current_time):
 def set_points(user_id, points):
     '''Updates user points in db.'''
     # Connect to the database
-    conn = sqlite3.connect('data/points.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
     # Check the last awarded timestamp for the user
@@ -86,7 +94,7 @@ def set_points(user_id, points):
 def get_level(user_id):
     '''Returns user level from db.'''
     # Connect to the database
-    conn = sqlite3.connect('data/points.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
     cursor.execute('SELECT level FROM points WHERE user_id = ?', (user_id,))
@@ -102,7 +110,7 @@ def get_level(user_id):
 def set_level(user_id, level):
     '''Sets user level in db.'''
     # Connect to the database
-    conn = sqlite3.connect('data/points.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
     cursor.execute('UPDATE points SET level = ? WHERE user_id = ?', (level, user_id,))
@@ -113,7 +121,7 @@ def set_level(user_id, level):
 def get_inventory(user_id):
     '''Returns user inventory from inventory db table.'''
     # Connect to the database
-    conn = sqlite3.connect('data/points.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
     # Return user inventory list
@@ -127,7 +135,7 @@ def get_inventory(user_id):
 def add_to_inventory(user_id, item_name, item_value, item_rarity, purchase_date):
     '''Addes item to user inventory.'''
     # Connect to the database
-    conn = sqlite3.connect('data/points.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
     # Extract data from item_info and add to inventory
@@ -142,7 +150,7 @@ def add_to_inventory(user_id, item_name, item_value, item_rarity, purchase_date)
 def get_top_five():
     '''Returns top 5 users sorted by level and points.'''
     # Connect to the database
-    conn = sqlite3.connect('data/points.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
     # Checks top 5 users
@@ -164,7 +172,7 @@ def get_shop_items():
     }
 
     # Connect to sqlite database (make new if doesn't exist)
-    conn = sqlite3.connect('data/points.db')
+    conn = sqlite3.connect(db_path)
 
     # Create a cursor object to execute SQL commands
     cursor = conn.cursor()
@@ -183,7 +191,7 @@ def get_shop_items():
 def get_owned_item(user_id, item_name):
     '''This function is used to check if a user already owns an item.'''
     # Connect to sqlite database (make new if doesn't exist)
-    conn = sqlite3.connect('data/points.db')
+    conn = sqlite3.connect(db_path)
 
     # Create a cursor object to execute SQL commands
     cursor = conn.cursor()
