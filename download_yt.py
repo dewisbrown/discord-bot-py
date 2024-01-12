@@ -1,4 +1,5 @@
 import os
+import logging
 from pytube import YouTube
 from pytube import Search
 
@@ -9,6 +10,9 @@ def download(url, request_author):
             yt = YouTube(url)
         else:
             yt = Search(url).results[0] # first result of search query
+
+        # attempt age bypass
+        yt.bypass_age_gate()
 
         audio_stream = yt.streams.filter(only_audio=True).first()
         output_path = os.path.join(os.path.dirname(__file__), 'downloads')
@@ -22,7 +26,7 @@ def download(url, request_author):
             'file_path': file_path
         }
     except Exception as ex:
-        print(str(ex))
+        logging.error(str(ex))
 
 
 def format_time(seconds):
