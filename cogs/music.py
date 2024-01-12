@@ -68,6 +68,11 @@ class MusicCog(commands.Cog):
             try:
                 # Download URL and get info
                 song_info = download_yt.download(url, ctx.author.name)
+
+                # age restriction bypass or something didn't work in download_yt
+                if song_info is None:
+                    raise RuntimeError
+
                 queue.append(song_info)
                 await ctx.reply(f'{note_emoji}  Added **{song_info["song_name"]} (`{song_info["song_duration"]}`)** to begin playing.')
 
@@ -97,7 +102,7 @@ class MusicCog(commands.Cog):
                     # Remove download from downloads directory
                     download_yt.delete(next_song['file_path'])
             except Exception as ex:
-                 logging.error('Failed to play song: %s', str(ex))
+                logging.error('Failed to play song: %s', str(ex))
 
             # Leave the voice channel
             await voice_client.disconnect()
