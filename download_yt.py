@@ -1,13 +1,23 @@
 import os
 import logging
+from dotenv import load_dotenv
+
+import spotipy
+from spotipy.oauth2 import SpotifyClientCredentials
 from pytube import YouTube
 from pytube import Search
+
+
+load_dotenv()
 
 def download(url, request_author):
     '''Downloads YouTube video and returns YouTube video data.'''
     try:
-        if is_url(url): # check to see if user input from play command is a youtube url
+        if is_yt_url(url): # check to see if user input from play command is a youtube url
             yt = YouTube(url)
+        elif is_spotify_url(url):
+            search_terms = get_search_terms(url)
+            yt = Search(search_terms).results[0]
         else:
             yt = Search(url).results[0] # first result of search query
 
@@ -48,8 +58,31 @@ def delete(file_path):
         print(file_path)
 
 
-def is_url(user_input: str) -> bool:
+def is_yt_url(user_input: str) -> bool:
     '''Checks if input string is a YouTube url.'''
     if 'https://www.youtube.com/' in user_input:
         return True
     return False
+
+
+def is_spotify_url(user_input: str) -> bool:
+    """
+    Checks if input string is a spotify url.
+    """
+    if 'open.spotify.com/track/' in user_input:
+        return True
+    return False
+
+
+def get_search_terms(url: str) -> str:
+    """
+    Extracts artist and song name from spotify url.
+    """
+    client_id = os.getenv('SPOTIFY_CLIENT_ID')
+    client_secret = os.getenv('SPOTIFY_CLIENT_SECRET')
+
+    auth_manager = SpotifyClientCredentials(client_id=client_id, client_secret=client_secret)
+    sp = spotipy.Spotify(auth_manager=auth_manager)
+
+    track = sp.track(url)
+    return f"{track['name']} {track['artists'][0]['name']}"
