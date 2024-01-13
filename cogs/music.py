@@ -71,7 +71,8 @@ class MusicCog(commands.Cog):
 
                 # age restriction bypass or something didn't work in download_yt
                 if song_info is None:
-                    raise RuntimeError
+                    await ctx.reply('Playback canceled. The video you submitted is age restricted :(')
+                    raise RuntimeError  # not sure how to handle this, just raising random error?
 
                 queue.append(song_info)
                 await ctx.reply(f'{note_emoji}  Added **{song_info["song_name"]} (`{song_info["song_duration"]}`)** to begin playing.')
