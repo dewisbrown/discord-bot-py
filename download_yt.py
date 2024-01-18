@@ -11,7 +11,9 @@ from pytube import Search
 load_dotenv()
 
 def download(url, request_author):
-    '''Downloads YouTube video and returns YouTube video data.'''
+    """
+    Downloads YouTube video and returns YouTube video data.
+    """
     try:
         if is_yt_url(url): # check to see if user input from play command is a youtube url
             yt = YouTube(url)
