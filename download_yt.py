@@ -22,7 +22,7 @@ def download(url, request_author):
             yt = Search(url).results[0] # first result of search query
 
         # attempt age bypass
-        yt.bypass_age_gate()
+        # yt.bypass_age_gate()
 
         audio_stream = yt.streams.filter(only_audio=True).first()
         output_path = os.path.join(os.path.dirname(__file__), 'downloads')
@@ -85,4 +85,5 @@ def get_search_terms(url: str) -> str:
     sp = spotipy.Spotify(auth_manager=auth_manager)
 
     track = sp.track(url)
+    logging.info('Converting spotify url %s to [%s %s]', url, track['name'], track['artists'][0]['name'])
     return f"{track['name']} {track['artists'][0]['name']}"
