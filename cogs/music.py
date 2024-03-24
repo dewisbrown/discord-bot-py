@@ -58,7 +58,7 @@ class MusicCog(commands.Cog):
         if voice_client:
             try:
                 # Download URL and get info, add to queue
-                song_info = download_yt.download(url, ctx.author.name)
+                song_info = download_yt.get_song_info(url, ctx.author.name)
                 queue.append(song_info)
 
                 await ctx.reply(f'{note_emoji}  **{song_info["song_name"]}** added to the queue (`{song_info["song_duration"]}`) - at position {len(queue)}')
@@ -66,12 +66,13 @@ class MusicCog(commands.Cog):
                 logging.error('Failed to add song to queue: %s', str(ex))
         else:
             try:
-                # Download URL and get info
-                song_info = download_yt.download(url, ctx.author.name)
+                # Extract info from url
+                song_info = download_yt.get_song_info(url, ctx.author.name)
 
                 # age restriction bypass or something didn't work in download_yt
                 if song_info is None:
-                    await ctx.reply('Playback canceled. The video you submitted is age restricted :(')
+                    reply = f'Playback canceled. Something went wrong with this link:\n{url}'
+                    await ctx.reply(reply)
                     raise RuntimeError  # not sure how to handle this, just raising random error?
 
                 queue.append(song_info)
@@ -84,11 +85,15 @@ class MusicCog(commands.Cog):
                 while len(queue) > 0:
                     next_song = queue.pop(0)
 
+                    # Download YouTube audio stream, save file_path to song dict
+                    audio_path = download_yt.download(url=next_song['url'])
+                    next_song['file_path'] = audio_path
+
                     global current_song
                     current_song = next_song
 
                     # Play the audio stream
-                    voice_client.play(discord.FFmpegPCMAudio(next_song['file_path']))
+                    voice_client.play(discord.FFmpegPCMAudio(current_song['file_path']))
 
                     embed = discord.Embed(title=f'Queue length: {len(queue)}', timestamp=datetime.datetime.now())
                     embed.set_author(name=f'{ctx.guild.name} - Now playing', icon_url=ctx.guild.icon)
@@ -101,7 +106,7 @@ class MusicCog(commands.Cog):
                         await asyncio.sleep(1)
 
                     # Remove download from downloads directory
-                    download_yt.delete(next_song['file_path'])
+                    download_yt.delete(current_song['file_path'])
             except Exception as ex:
                 logging.error('Failed to play song: %s', str(ex))
 
@@ -122,13 +127,16 @@ class MusicCog(commands.Cog):
 
         if voice_client and voice_client.is_playing():
             voice_client.stop()
-            await ctx.reply(f'{cowboy_emoji}  Skipped **{current_song["song_name"]}** ' /
-                           f'- [`{current_song["song_duration"]}`]')
+            await ctx.reply(f'{cowboy_emoji}  Skipped **{skipped_song["song_name"]}** ' /
+                           f'- [`{skipped_song["song_duration"]}`]')
 
             if queue:
                 next_song = queue.pop(0)
+                audio_path = download_yt.download(url=current_song['url'])
+                next_song['file_path'] = audio_path
                 current_song = next_song
-                voice_client.play(discord.FFmpegPCMAudio(next_song['file_path']))
+
+                voice_client.play(discord.FFmpegPCMAudio(current_song['file_path']))
 
                 embed = discord.Embed(title=f'Queue length: {len(queue)}', timestamp=datetime.datetime.now())
                 embed.set_author(name=f'{ctx.guild.name} - Now playing', icon_url=ctx.guild.icon)
@@ -157,8 +165,6 @@ class MusicCog(commands.Cog):
             download_yt.delete(current_song['file_path'])
 
             # delete songs in queue
-            for song in queue:
-                download_yt.delete(song["file_path"])
             queue.clear()
         else:
             await ctx.send('There is no song currently playing.')
