@@ -51,7 +51,8 @@ def get_song_info(url, request_author) -> dict:
             'song_name': yt.title, 
             'song_duration': format_time(yt.length), 
             'request_author': request_author, 
-            'thumbnail_url': yt.thumbnail_url, 
+            'thumbnail_url': yt.thumbnail_url,
+            'url': url
         }
     except Exception as ex:
         logging.error(str(ex))
