@@ -10,9 +10,9 @@ from pytube import Search
 
 load_dotenv()
 
-def download(url, request_author):
+def download(url) -> str:
     """
-    Downloads YouTube video and returns YouTube video data.
+    Downloads YouTube video and returns file path for mp3.
     """
     try:
         if is_yt_url(url): # check to see if user input from play command is a youtube url
@@ -28,14 +28,31 @@ def download(url, request_author):
 
         audio_stream = yt.streams.filter(only_audio=True).first()
         output_path = os.path.join(os.path.dirname(__file__), 'downloads')
-        file_path = audio_stream.download(output_path=output_path)
+
+        return audio_stream.download(output_path=output_path)
+    except Exception as ex:
+        logging.error(str(ex))
+
+
+def get_song_info(url, request_author) -> dict:
+    """
+    Extracts YouTube video info from submitted url.
+    """
+    try:
+        if is_yt_url(url): # check to see if user input from play command is a youtube url
+            yt = YouTube(url)
+        elif is_spotify_url(url):
+            search_terms = get_search_terms(url)
+            yt = Search(search_terms).results[0]
+        else:
+            yt = Search(url).results[0] # first result of search query
 
         return {
             'song_name': yt.title, 
             'song_duration': format_time(yt.length), 
             'request_author': request_author, 
-            'thumbnail_url': yt.thumbnail_url, 
-            'file_path': file_path
+            'thumbnail_url': yt.thumbnail_url,
+            'url': url
         }
     except Exception as ex:
         logging.error(str(ex))
