@@ -97,6 +97,7 @@ class BasicsCog(commands.Cog):
         """
         Returns amount of days since Elijah joined the military.
         """
+        logging.info('Elijah command submitted by [%s]', ctx.author.name)
         sad_emoji = '\U0001F62D'
         file = discord.File('images/eli.png')
 
