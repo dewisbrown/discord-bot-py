@@ -98,6 +98,7 @@ class BasicsCog(commands.Cog):
         Returns amount of days since Elijah joined the military.
         """
         sad_emoji = '\U0001F62D'
+        file = discord.File('images/eli.png')
 
         day_eli_left = datetime.datetime(year=2024, month=3, day=27)
         today = datetime.datetime.now()
@@ -105,9 +106,9 @@ class BasicsCog(commands.Cog):
 
         embed = discord.Embed(title="Days Since Elijah Joined", timestamp=datetime.datetime.now())
         embed.set_thumbnail(url='attachment://images/eli.png')
-        embed.add_field(name='', value=f'{difference.days} days \t{sad_emoji}')
+        embed.add_field(name='', value=f'{difference.days} days \t{sad_emoji}', inline=False)
 
-        await ctx.send(embed=embed)
+        await ctx.send(file=file, embed=embed)
 
 
     @commands.command()
