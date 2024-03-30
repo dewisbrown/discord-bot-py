@@ -93,6 +93,24 @@ class BasicsCog(commands.Cog):
 
 
     @commands.command()
+    async def elijah(self, ctx):
+        """
+        Returns amount of days since Elijah joined the military.
+        """
+        sad_emoji = '\U0001F62D'
+
+        day_eli_left = datetime.datetime(year=2024, month=3, day=27)
+        today = datetime.datetime.now()
+        difference = today - day_eli_left
+
+        embed = discord.Embed(title="Days Since Elijah Joined", timestamp=datetime.datetime.now())
+        embed.set_thumbnail(url='attachment://images/eli.png')
+        embed.add_field(name='', value=f'{difference.days} days \t{sad_emoji}')
+
+        await ctx.send(embed=embed)
+
+
+    @commands.command()
     async def updates(self, ctx):
         '''Bot changes and updates listed in embed.'''
         # Update timestamp each time new updates are posted
