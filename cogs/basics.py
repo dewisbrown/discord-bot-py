@@ -99,17 +99,16 @@ class BasicsCog(commands.Cog):
         """
         logging.info('Elijah command submitted by [%s]', ctx.author.name)
         sad_emoji = '\U0001F62D'
-        file = discord.File('images/eli.png')
+        # file = discord.File('images/eli.png')
 
         day_eli_left = datetime.datetime(year=2024, month=3, day=27)
         today = datetime.datetime.now()
         difference = today - day_eli_left
 
         embed = discord.Embed(title="Days Since Elijah Joined", timestamp=datetime.datetime.now())
-        embed.set_thumbnail(url='attachment://images/eli.png')
         embed.add_field(name='', value=f'{difference.days} days \t{sad_emoji}', inline=False)
 
-        await ctx.send(file=file, embed=embed)
+        await ctx.send(embed=embed)
 
 
     @commands.command()
